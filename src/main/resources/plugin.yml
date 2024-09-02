@@ -1,0 +1,4 @@
+name: Prison
+version: '${project.version}'
+main: ksu.gamemode.prison.Prison
+api-version: '1.21'

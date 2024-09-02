@@ -1,4 +1,4 @@
 name: Prison
-version: '${project.version}'
-main: ksu.gamemode.prison.Prison
+version: '1.0-SNAPSHOT'
+main: ksu.minecraft.prison.Prison
 api-version: '1.21'

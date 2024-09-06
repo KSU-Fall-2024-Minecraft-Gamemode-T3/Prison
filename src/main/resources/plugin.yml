@@ -1,4 +1,33 @@
 name: Prison
-version: '1.0-SNAPSHOT'
+version: '0.1-SNAPSHOT'
 main: ksu.minecraft.prison.Prison
 api-version: '1.21'
+description: A simple plugin that responds with "Go Owls!" when /ksu is typed.
+commands:
+  ksu:
+    description: Sends a custom message to the player.
+    usage: /ksu
+  prison:
+    description: Main command for the Prison plugin.
+    usage: /<command> <args>
+    aliases: [ prison ]
+    # Define the subcommands, including 'help', 'ranks', and 'reload'
+    subcommands:
+      help:
+        description: Opens the help menu.
+        usage: /prison help
+      ranks:
+        description: Opens the ranks menu.
+        usage: /prison ranks
+      reload:
+        description: Reloads the Prison plugin.
+        usage: /prison reload
+
+permissions:
+  prison.use:
+    description: Allows a player to use the /prison command.
+    default: true
+  prison.admin:
+    description: Allows a player to use admin commands for the plugin.
+    default: op
+permission-message: You do not have permission to execute this command.

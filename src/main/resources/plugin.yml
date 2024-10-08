@@ -9,7 +9,7 @@ commands:
     usage: /ksu
   prison:
     description: Main command for the Prison plugin.
-    usage: /<command> <args>
+    usage: /prison <args>
     aliases: [ prison ]
     # Define the subcommands, including 'help', 'ranks', and 'reload'
     subcommands:
@@ -22,6 +22,12 @@ commands:
       reload:
         description: Reloads the Prison plugin.
         usage: /prison reload
+  ranks:
+    description: Shows rank progression and costs.
+    usage: /ranks
+  rankup:
+      description: Ranks up the player if they can afford it.
+      usage: /rankup
 
 permissions:
   prison.use:
@@ -31,3 +37,4 @@ permissions:
     description: Allows a player to use admin commands for the plugin.
     default: op
 permission-message: You do not have permission to execute this command.
+depend: [LuckPerms, Vault]

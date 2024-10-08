@@ -1,2 +1,21 @@
 messages:
   ksu-command-response: "<green>Go Owls!"
+ranks:
+  D:
+    next_rank: C
+    price: 18000
+  C:
+    next_rank: B
+    price: 50000
+  B:
+    next_rank: A
+    price: 190000
+  A:
+    next_rank: K
+    price: 500000
+  K:
+    next_rank: S
+    price: 1300000
+  S:
+    next_rank: U
+    price: 2500000

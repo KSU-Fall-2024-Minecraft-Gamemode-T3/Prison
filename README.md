@@ -18,12 +18,16 @@ This Prison gameplay mode features old school Prison features and\ where there i
 
 ### Commands
 
+>/ksu
+
+Tells the player "Go Owls!" in gold.
+
 >/prison
 
 Open the main prison menu.
 
 >/prison help
->
+
 When help is requested this menu shows the available commands for use depending on permissions.
 
 >/ranks
@@ -37,6 +41,22 @@ This will help the player to get to the next level, if they has enough money.
 >/prison reload
 
 Reloads this plugin and configuration files.
+
+>/sell
+
+Opens up a gui where items can be sold individually.
+
+>sellall
+
+Sells all defined items in the players inventory
+
+>/mines
+
+Lists the current mines that are listed in the mines.yml
+
+>/minereset <minename>
+
+Refills the mine defined
 
 ### Configuration
 
@@ -82,4 +102,5 @@ ranks:
 Paper (Minecraft server jar)
 LuckPerms (Permissions system)
 Vault (Economy management)
+FAWE (Mines management)
 ```

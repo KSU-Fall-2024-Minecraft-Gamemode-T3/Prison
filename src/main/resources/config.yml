@@ -1,5 +1,8 @@
+#/KSU ECHO MESSAGE
 messages:
   ksu-command-response: "<green>Go Owls!"
+
+#RANKS AND PRICING
 ranks:
   D:
     next_rank: C
@@ -19,3 +22,45 @@ ranks:
   S:
     next_rank: U
     price: 2500000
+
+#ITEMS AND PRICING
+sellable-items:
+  COBBLESTONE:
+    price: 1.00
+  OAK_LOG:
+    price: 1.20
+  IRON_INGOT:
+    price: 7.70
+  IRON_ORE:
+    price: 4.60
+  COAL:
+    price: 3.40
+  LAPIS_LAZULI:
+    price: 2.80
+  GOLD_INGOT:
+    price: 3.90
+  GOLD_ORE:
+    price: 3.55
+  CACTUS:
+    price: 0.32
+  DIAMOND:
+    price: 50.00
+  SANDSTONE:
+    price: 1.00
+  MELON:
+    price: 6.00
+  PUMPKIN:
+    price: 5.00
+  EMERALD:
+    price: 70.00
+  REDSTONE:
+    price: 0.30
+  BIRCH_LOG:
+    price: 2.00
+  NETHERRACK:
+    price: 1.40
+  SNOW_BLOCK:
+    price: 0.50
+  SNOWBALL:
+    price: 0.10
+

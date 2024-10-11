@@ -1,5 +1,6 @@
-package ksu.minecraft.prison;
+package ksu.minecraft.prison.listeners;
 
+import ksu.minecraft.prison.Prison;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,7 +22,6 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        // Handle inventory clicks here
     }
 
     @EventHandler

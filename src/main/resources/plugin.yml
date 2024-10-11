@@ -1,5 +1,5 @@
 name: Prison
-version: '0.1-SNAPSHOT'
+version: '1.0-SNAPSHOT'
 main: ksu.minecraft.prison.Prison
 api-version: '1.21'
 description: A simple plugin that responds with "Go Owls!" when /ksu is typed.
@@ -11,7 +11,7 @@ commands:
     description: Main command for the Prison plugin.
     usage: /prison <args>
     aliases: [ prison ]
-    # Define the subcommands, including 'help', 'ranks', and 'reload'
+    # Define the subcommands
     subcommands:
       help:
         description: Opens the help menu.
@@ -28,6 +28,22 @@ commands:
   rankup:
       description: Ranks up the player if they can afford it.
       usage: /rankup
+  sellall:
+    description: Sells all sellable items in the player's inventory.
+    usage: /sellall
+  sell:
+    description: Opens a menu where you can sell items.
+    usage: /sell
+  mines:
+    description: Admin-only command to access the mines.
+    usage: /mines
+    permission: prison.admin
+    permission-message: You do not have permission to use this command.
+  minereset:
+    description: Resets the specified mine.
+    usage: /minereset <minename>
+    permission: prison.admin
+    permission-message: You do not have permission to use this command.
 
 permissions:
   prison.use:

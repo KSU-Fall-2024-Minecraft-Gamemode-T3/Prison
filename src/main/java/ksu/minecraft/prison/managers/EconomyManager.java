@@ -1,5 +1,6 @@
-package ksu.minecraft.prison;
+package ksu.minecraft.prison.managers;
 
+import ksu.minecraft.prison.Prison;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -10,6 +11,11 @@ public class EconomyManager {
     private Economy economy;
 
     public EconomyManager(Prison plugin) {
+        RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            throw new IllegalStateException("Vault not found! Make sure Vault is installed.");
+        }
+        this.economy = rsp.getProvider();
         this.plugin = plugin;
         setupEconomy();
     }
@@ -35,5 +41,8 @@ public class EconomyManager {
 
     public void deductMoney(Player player, int price) {
         economy.withdrawPlayer(player, price);
+    }
+    public void depositMoney(Player player, double amount) {
+        economy.depositPlayer(player, amount);
     }
 }

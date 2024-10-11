@@ -1,5 +1,6 @@
-package ksu.minecraft.prison;
+package ksu.minecraft.prison.managers;
 
+import ksu.minecraft.prison.Prison;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.user.User;
 import org.bukkit.Bukkit;

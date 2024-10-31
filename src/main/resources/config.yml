@@ -23,6 +23,21 @@ ranks:
     next_rank: U
     price: 2500000
 
+# Define cell rental prices and durations by region
+cells:
+  d:
+    price: 1000       # Price for D cells
+    duration: 7       # Duration in days for renting D cells
+  c:
+    price: 1500       # Price for C cells
+    duration: 7       # Duration in days for renting C cells
+  b:
+    price: 2500       # Price for B cells
+    duration: 7       # Duration in days for renting B cells
+  a:
+    price: 4000       # Price for A cells
+    duration: 7       # Duration in days for renting A cells
+
 #ITEMS AND PRICING
 sellable-items:
   COBBLESTONE:

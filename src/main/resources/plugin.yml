@@ -2,45 +2,29 @@ name: Prison
 version: '1.0-SNAPSHOT'
 main: ksu.minecraft.prison.Prison
 api-version: '1.21'
-description: A simple plugin that responds with "Go Owls!" when /ksu is typed.
+description: A prison plugin for Minecraft
+
 commands:
-  ksu:
-    description: Sends a custom message to the player.
-    usage: /ksu
   prison:
-    description: Main command for the Prison plugin.
+    description: Main command for the Prison plugin
     usage: /prison <args>
-    aliases: [ prison ]
-    # Define the subcommands
-    subcommands:
-      help:
-        description: Opens the help menu.
-        usage: /prison help
-      ranks:
-        description: Opens the ranks menu.
-        usage: /prison ranks
-      reload:
-        description: Reloads the Prison plugin.
-        usage: /prison reload
+    aliases: [prison]
   ranks:
-    description: Shows rank progression and costs.
+    description: Shows rank progression and costs
     usage: /ranks
   rankup:
-      description: Ranks up the player if they can afford it.
-      usage: /rankup
-  sellall:
-    description: Sells all sellable items in the player's inventory.
-    usage: /sellall
-  sell:
-    description: Opens a menu where you can sell items.
-    usage: /sell
+    description: Ranks up the player if they can afford it
+    usage: /rankup
+  cells:
+    description: View and rent cells
+    usage: /cells
   mines:
-    description: Admin-only command to access the mines.
+    description: Admin-only command to access the mines
     usage: /mines
     permission: prison.admin
     permission-message: You do not have permission to use this command.
   minereset:
-    description: Resets the specified mine.
+    description: Resets the specified mine
     usage: /minereset <minename>
     permission: prison.admin
     permission-message: You do not have permission to use this command.
@@ -53,4 +37,3 @@ permissions:
     description: Allows a player to use admin commands for the plugin.
     default: op
 permission-message: You do not have permission to execute this command.
-depend: [LuckPerms, Vault]

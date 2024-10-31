@@ -25,7 +25,7 @@ public class MineResetCommand implements CommandExecutor {
                 String mineName = args[0];
 
                 // TODO use minimessage color
-                if (mineManager.resetMineCommand(player, mineName)) {
+                if (mineManager.resetMineCommand(mineName, player)) {
                     player.sendMessage(ChatColor.GREEN + "Mine " + mineName + " has been reset.");
                     return true;
                 } else {

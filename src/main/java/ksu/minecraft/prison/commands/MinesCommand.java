@@ -1,5 +1,6 @@
 package ksu.minecraft.prison.commands;
 
+import ksu.minecraft.prison.managers.MineManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,7 +13,7 @@ public class MinesCommand implements CommandExecutor {
 
     private final JavaPlugin plugin;
 
-    public MinesCommand(JavaPlugin plugin) {
+    public MinesCommand(JavaPlugin plugin, MineManager mineManager) {
         this.plugin = plugin;
     }
 

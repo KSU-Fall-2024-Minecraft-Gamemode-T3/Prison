@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -48,29 +49,56 @@ public class Menus {
     }
 
     public void openPrisonRanksMenu(Player player) {
-        Inventory ranksMenu = Bukkit.createInventory(null, 18, Component.text("Prison Ranks"));
+        // Limit the menu to 9 slots (1 row)
+        Inventory ranksMenu = Bukkit.createInventory(null, 9, Component.text("Prison Ranks"));
 
-        char[] ranks = {'D', 'C', 'B', 'A', 'K', 'S', 'U'};
-        for (char c : ranks) {
+        FileConfiguration config = plugin.getConfig();
+        int slot = 0;  // Track slots for 1-row inventory
+        for (String rank : config.getConfigurationSection("ranks").getKeys(false)) {
+            if (slot >= 9) break;  // Prevent more than 9 items from being added to the inventory
+
+            String nextRank = config.getString("ranks." + rank + ".next_rank");
+            int price = config.getInt("ranks." + rank + ".price");
+
             ItemStack emerald = new ItemStack(Material.EMERALD);
             ItemMeta emeraldMeta = emerald.getItemMeta();
-            emeraldMeta.displayName(Component.text(String.valueOf(c)));
+            emeraldMeta.displayName(Component.text(rank + " >> " + nextRank + " for $" + price));
             emerald.setItemMeta(emeraldMeta);
-            ranksMenu.addItem(emerald);
+
+            ranksMenu.setItem(slot, emerald);
+            slot++;  // Increment slot to fill one row
         }
 
         player.openInventory(ranksMenu);
     }
 
+
+    public void openWarpsMenu(Player player) {
+        Inventory warpsMenu = Bukkit.createInventory(null, 9, Component.text("Warps Menu"));
+
+        String[] warps = {"D", "C", "B", "A", "K", "S", "U", "Cells"};
+        for (String warp : warps) {
+            ItemStack warpItem = new ItemStack(Material.ENDER_PEARL);
+            ItemMeta warpMeta = warpItem.getItemMeta();
+            warpMeta.displayName(Component.text("Warp to " + warp));
+            warpItem.setItemMeta(warpMeta);
+            warpsMenu.addItem(warpItem);
+        }
+
+        player.openInventory(warpsMenu);
+    }
+
     public void showHelpMenu(Player player) {
         String helpMessage = """
-            <green>Prison Plugin Help</green>
-            <yellow>/prison</yellow> - Opens the main prison menu.
-            <yellow>/prison help</yellow> - Shows this help menu.
-            <yellow>/ranks</yellow> - Shows rank progression.
-            <yellow>/rankup</yellow> - Rank up to the next rank.
-            """;
+        <green>Prison Plugin Help</green>
+        <yellow><click:run_command:'/prison'>/prison</click></yellow> - Opens the main prison menu.
+        <yellow><click:run_command:'/prison help'>/prison help</click></yellow> - Shows this help menu.
+        <yellow><click:run_command:'/ranks'>/ranks</click></yellow> - Shows rank progression.
+        <yellow><click:run_command:'/rankup'>/rankup</click></yellow> - Rank up to the next rank.
+        """;
+
         Component parsedHelpMessage = MiniMessage.miniMessage().deserialize(helpMessage);
         player.sendMessage(parsedHelpMessage);
     }
+
 }

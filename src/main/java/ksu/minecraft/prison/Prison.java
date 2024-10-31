@@ -1,23 +1,30 @@
 package ksu.minecraft.prison;
 
-import ksu.minecraft.prison.commands.MinesCommand;
-import ksu.minecraft.prison.commands.SellAllCommand;
-import ksu.minecraft.prison.commands.SellCommand;
+import ksu.minecraft.prison.commands.CellsCommand;
+import ksu.minecraft.prison.commands.MineResetCommand;
+import ksu.minecraft.prison.commands.RanksCommand;
 import ksu.minecraft.prison.listeners.EventListener;
 import ksu.minecraft.prison.managers.EconomyManager;
 import ksu.minecraft.prison.managers.MineManager;
 import ksu.minecraft.prison.managers.RankManager;
+import ksu.minecraft.prison.managers.ShopVillagerManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.luckperms.api.LuckPerms;
 import net.milkbowl.vault.economy.Economy;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.Bukkit;
+
+import java.io.File;
+import java.io.IOException;
 
 public final class Prison extends JavaPlugin {
 
@@ -25,36 +32,57 @@ public final class Prison extends JavaPlugin {
     private Economy economy;
     private EconomyManager economyManager;
     private RankManager rankManager;
-    private Menus menus;
     private MineManager mineManager;
+    private ShopVillagerManager shopVillagerManager;
     private File minesConfigFile;
     private FileConfiguration minesConfig;
+    private FileConfiguration config;
+    private Menus menus;
 
     @Override
     public void onEnable() {
         getLogger().info("Prison plugin has been enabled!");
-        saveDefaultConfig();
-        createMinesConfig();
+        this.config = this.loadConfigFile("config.yml");
+        this.minesConfig = this.loadConfigFile("mines.yml");
 
         luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         economyManager = new EconomyManager(this);
         rankManager = new RankManager(this, luckPerms);
-        menus = new Menus(this);
         mineManager = new MineManager(this);
+        shopVillagerManager = new ShopVillagerManager(this);
+        menus = new Menus(this);
 
-        this.getCommand("sellall").setExecutor(new SellAllCommand(this, economyManager));
-        this.getCommand("sell").setExecutor(new SellCommand(this, economyManager));
-        this.getCommand("mines").setExecutor(new MinesCommand(this));
+        RegisteredServiceProvider<LuckPerms> provider = getServer().getServicesManager().getRegistration(LuckPerms.class);
+        if (provider != null) {
+            luckPerms = provider.getProvider();
+        }
 
-        getServer().getPluginManager().registerEvents(new ksu.minecraft.prison.listeners.SellMenuListener(this, economyManager), this);
+        this.getCommand("minereset").setExecutor(new MineResetCommand(mineManager));
+        this.getCommand("cells").setExecutor(new CellsCommand(this));
+        this.getCommand("ranks").setExecutor(new RanksCommand(this, rankManager));
+
+
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
-        getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        shopVillagerManager.spawnShopVillagers(); // Spawn shop villagers
+
         getServer().getScheduler().runTaskTimer(this, () -> mineManager.monitorMines(), 0L, 20L * 60); // Every minute
     }
 
     @Override
     public void onDisable() {
         getLogger().info("Prison plugin has been disabled!");
+    }
+
+    public Menus getMenus() {
+        return menus;
+    }
+
+    private FileConfiguration loadConfigFile(String name) {
+        File file = new File(getDataFolder(), name);
+        if (!file.exists()) {
+            saveResource(name, false);
+        }
+        return YamlConfiguration.loadConfiguration(file);
     }
 
     @Override
@@ -64,13 +92,13 @@ public final class Prison extends JavaPlugin {
 
             if (command.getName().equalsIgnoreCase("prison")) {
                 if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
-                    menus.showHelpMenu(player);
+                    sendHelpMenu(player);
                     return true;
                 } else if (args.length > 0 && args[0].equalsIgnoreCase("ranks")) {
-                    menus.openPrisonRanksMenu(player);
+                    openPrisonRanksMenu(player);
                     return true;
                 } else {
-                    menus.openPrisonMenu(player);
+                    openPrisonMenu(player);
                     return true;
                 }
             } else if (command.getName().equalsIgnoreCase("rankup")) {
@@ -89,89 +117,47 @@ public final class Prison extends JavaPlugin {
         return rankManager;
     }
 
-    public Menus getMenus() {
-        return menus;
+    public MineManager getMineManager() {
+        return mineManager;
     }
 
-    public FileConfiguration getMinesConfig() {
-        return minesConfig;
+    public FileConfiguration getPluginConfig() {
+        return config;
     }
 
-    private void createMinesConfig() {
-        minesConfigFile = new File(getDataFolder(), "mines.yml");
-
-        if (!minesConfigFile.exists()) {
-            getLogger().info("mines.yml not found, generating blank template...");
-
-            try {
-                if (minesConfigFile.createNewFile()) {
-                    generateBlankMinesTemplate();
-                }
-            } catch (IOException e) {
-                getLogger().severe("Could not create mines.yml file!");
-            }
-        } else {
-            minesConfig = YamlConfiguration.loadConfiguration(minesConfigFile);
-        }
+    public LuckPerms getLuckPerms() {
+        return luckPerms;
     }
 
-    // Generation for a blank mines.yml template
-    //TODO Move to a resources files
-    private void generateBlankMinesTemplate() {
-        try (FileWriter writer = new FileWriter(minesConfigFile)) {
-            writer.write("# Mines Configuration Template\n");
-            writer.write("# Add your mines below in the following format:\n\n");
+    private void sendHelpMenu(Player player) {
+        MiniMessage mm = MiniMessage.miniMessage();
 
-            writer.write("# mines:\n");
-            writer.write("#   MineName:\n");
-            writer.write("#     resetDelay: <number>\n");
-            writer.write("#     surface: <material>\n");
-            writer.write("#     maxZ: <number>\n");
-            writer.write("#     maxY: <number>\n");
-            writer.write("#     maxX: <number>\n");
-            writer.write("#     fillMode: <true/false>\n");
-            writer.write("#     world: <world_name>\n");
-            writer.write("#     minY: <number>\n");
-            writer.write("#     resetWarnings: []\n");
-            writer.write("#     minX: <number>\n");
-            writer.write("#     composition:\n");
-            writer.write("#       <material>: <percentage>\n");
-            writer.write("#     name: <mine_name>\n");
-            writer.write("#     resetClock: <number>\n");
-            writer.write("#     minZ: <number>\n");
-            writer.write("#     isSilent: <true/false>\n\n");
+        Component helpMessage = mm.deserialize("""
+            <green><bold>Prison Plugin Help:</bold></green>
+            <hover:show_text:'<yellow>Open the main prison menu'><click:run_command:/prison>/prison</click></hover> - Main prison menu
+            <hover:show_text:'<yellow>View available ranks and costs'><click:run_command:/ranks>/ranks</click></hover> - Show rank progression and costs
+            <hover:show_text:'<yellow>Rank up if you can afford it'><click:run_command:/rankup>/rankup</click></hover> - Rank up
+            <hover:show_text:'<yellow>View and rent a cell'><click:run_command:/cells>/cells</click></hover> - Rent a cell in the prison
+            <hover:show_text:'<yellow>List and manage available mines (admin only)'><click:run_command:/mines>/mines</click></hover> - Manage mines
+            <hover:show_text:'<yellow>Manually reset a specific mine (admin only)'><click:run_command:/minereset <minename>>/minereset <minename></click></hover> - Reset specific mine
+        """);
 
-            writer.write("# Example:\n");
-            writer.write("#   D_Ore:\n");
-            writer.write("#     resetDelay: 0\n");
-            writer.write("#     surface: 'STONE'\n");
-            writer.write("#     maxZ: -289\n");
-            writer.write("#     maxY: 115\n");
-            writer.write("#     maxX: 170\n");
-            writer.write("#     fillMode: false\n");
-            writer.write("#     world: 'world'\n");
-            writer.write("#     minY: 85\n");
-            writer.write("#     resetWarnings: []\n");
-            writer.write("#     minX: 154\n");
-            writer.write("#     composition:\n");
-            writer.write("#       'STONE': 0.985\n");
-            writer.write("#       'COAL_ORE': 0.0075\n");
-            writer.write("#       'IRON_ORE': 0.0075\n");
-            writer.write("#     name: 'D_Mine'\n");
-            writer.write("#     resetClock: 0\n");
-            writer.write("#     minZ: -305\n");
-            writer.write("#     isSilent: false\n");
-
-        } catch (IOException e) {
-            getLogger().severe("Could not write to mines.yml file!");
-        }
+        player.sendMessage(helpMessage);
     }
 
-    public void saveMinesConfig() {
-        try {
-            minesConfig.save(minesConfigFile);
-        } catch (IOException e) {
-            getLogger().severe("Could not save mines.yml!");
-        }
+    private void openPrisonRanksMenu(Player player) {
+        Inventory ranksMenu = Bukkit.createInventory(null, 27, Component.text("Ranks Menu"));
+        // Populate the ranks menu with rank information (example items here)
+        player.openInventory(ranksMenu);
+    }
+
+    private void openPrisonMenu(Player player) {
+        Inventory prisonMenu = Bukkit.createInventory(null, 27, Component.text("Prison Menu"));
+        // Populate the prison menu with items (example items here)
+        player.openInventory(prisonMenu);
+    }
+
+    public NamespacedKey getNamespacedKey(String key) {
+        return new NamespacedKey(this, key);
     }
 }

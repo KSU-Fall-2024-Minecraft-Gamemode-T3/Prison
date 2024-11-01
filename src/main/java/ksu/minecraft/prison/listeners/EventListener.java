@@ -144,7 +144,7 @@ public class EventListener implements Listener {
     private String getPlayerRankWarp(Player player) {
         //Looks at the player as a user based on the unique ID of the player
         User user = plugin.getLuckPerms().getUserManager().getUser(player.getUniqueId());
-        player.sendMessage(Component.text("User is ") + user.getUsername());
+        //player.sendMessage(Component.text("User is ") + user.getUsername());
 
         if (user != null) {
 
@@ -153,7 +153,7 @@ public class EventListener implements Listener {
 
             if (primaryGroup != null && primaryGroup.length() == 1) {
                 return primaryGroup.toUpperCase();
-            }else if(primaryGroup == "default"){
+            }else if(primaryGroup.equals("default")){
                 return "D";
             }
 

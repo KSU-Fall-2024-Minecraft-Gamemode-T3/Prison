@@ -42,6 +42,7 @@ public class ShopVillagerManager {
             villager.setCustomName("Shop");
             villager.setCustomNameVisible(true);
             villager.getPersistentDataContainer().set(plugin.getNamespacedKey("is_shop"), PersistentDataType.BYTE, (byte) 1);
+
         }
     }
 
@@ -49,15 +50,19 @@ public class ShopVillagerManager {
     @EventHandler
     //TEST attempt at changing PlayerInteractAtEntityEvent to PlayerInteractEntityEvent
     public void onPlayerInteract(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
         //Check to see if the entity clicked has the shop key i.e. a villager. Could be a point of issue if the data types aren't right for some reason
         if (event.getRightClicked().getPersistentDataContainer().has(plugin.getNamespacedKey("is_shop"), PersistentDataType.BYTE)) {
 
             //event.setCancelled(true);
 
             //trying to open new sell menus found in Menus.java
-            plugin.getMenus().openSellMenu(event.getPlayer());
+            plugin.getMenus().openSellMenu(player);
 
             //event.getPlayer().openInventory(sellMenu);
+        }else{
+            player.sendMessage("Entity not detected as 'is_shop'");
+            plugin.getMenus().openSellMenu(player);
         }
     }
 

@@ -26,7 +26,7 @@ public class RanksCommand implements CommandExecutor {
             //Edited
             //Current Issue: Does not read from yml.file, removed a seemingly random period from one of the ranks
             plugin.getConfig().getConfigurationSection("ranks").getKeys(false)
-                    .forEach(rank -> player.sendMessage(rank + ": $" + plugin.getPluginConfig().getInt("ranks" + rank)));
+                    .forEach(rank -> player.sendMessage(rank + ": $" + plugin.getConfig().getInt("ranks" + rank)));
 
             /*plugin.getPluginConfig().getConfigurationSection("ranks").getKeys(false)
                     .forEach(rank -> player.sendMessage(rank + ": $" + plugin.getPluginConfig().getInt("ranks" + rank)));

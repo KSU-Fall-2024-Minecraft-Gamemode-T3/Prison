@@ -1,6 +1,7 @@
 package ksu.minecraft.prison.managers;
 
 import ksu.minecraft.prison.Prison;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -8,6 +9,7 @@ import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
@@ -47,15 +49,24 @@ public class ShopVillagerManager {
     //TEST attempt at changing PlayerInteractAtEntityEvent to PlayerInteractEntityEvent
     public void onPlayerInteract(PlayerInteractEntityEvent event) {
         //Check to see if the entity clicked has the shop key i.e. a villager. Could be a point of issue if the data types aren't right for some reason
+
         if (event.getRightClicked().getPersistentDataContainer().has(plugin.getNamespacedKey("is_shop"), PersistentDataType.BYTE)) {
-            //Don't know what is getting cancelled before anything is happening? could be the reason a menu doesn't show up.
-            //event.setCancelled(true);
-            Inventory sellMenu = Bukkit.createInventory(null, 27, "Sell Items");
+            //Prevent moving items into the Shop menu
+            event.setCancelled(true);
+
+            //Changed sell menu to be more like the other menus, see Component.text
+            Inventory sellMenu = Bukkit.createInventory(null, 27, Component.text("Sell Items"));
             // Populate sell menu items based on configuration
             ItemStack diamond = new ItemStack(Material.DIAMOND);
             diamond.getItemMeta().setDisplayName("Diamond\n$50");
             sellMenu.addItem(diamond);
             event.getPlayer().openInventory(sellMenu);
         }
+    }
+
+    //Makes the Villagers invincible since it would be bad to kill the only shop in a mine
+    @EventHandler
+    public void onEntityDamage(EntityDamageByEntityEvent event){
+        event.setCancelled(true);
     }
 }

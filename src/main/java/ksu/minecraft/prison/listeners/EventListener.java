@@ -14,6 +14,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import net.luckperms.api.model.user.User;
 
+import java.util.UUID;
+
 public class EventListener implements Listener {
 
     private final Prison plugin;
@@ -50,11 +52,44 @@ public class EventListener implements Listener {
                     case "Warps":
                         plugin.getMenus().openWarpsMenu(player);
                         break;
-                    case "Warp to D":
-                        plugin.getServer().dispatchCommand(player, "warp d");
                     default:
                         player.sendMessage("Warp does not exist.");
                 }
+            }
+        }
+
+        //switch cases for the warp menu
+        if(event.getView().title().equals(Component.text("Warps Menu"))){
+            event.setCancelled(true);  // Prevent moving items in the Prison Menu
+
+            ItemStack clickedItem = event.getCurrentItem();
+            Player player = (Player) event.getWhoClicked();
+
+            if (clickedItem != null && clickedItem.hasItemMeta()){
+                String itemName = MiniMessage.miniMessage().serialize(clickedItem.getItemMeta().displayName());
+
+                switch(itemName){
+                    case "Warp to D":
+                        plugin.getServer().dispatchCommand(player, "warp d");
+                    case "Warp to C":
+                        plugin.getServer().dispatchCommand(player, "warp c");
+                    case "Warp to B":
+                        plugin.getServer().dispatchCommand(player, "warp b");
+                    case "Warp to A":
+                        plugin.getServer().dispatchCommand(player, "warp a");
+                    case "Warp to K":
+                        plugin.getServer().dispatchCommand(player, "warp k");
+                    case "Warp to S":
+                        plugin.getServer().dispatchCommand(player, "warp s");
+                    case "Warp to U":
+                        plugin.getServer().dispatchCommand(player, "warp u");
+                    case "Warp to Cells":
+                        plugin.getServer().dispatchCommand(player, "warp cells");
+                    default:
+                        player.sendMessage("Sorry, that warp does not exist!");
+                }
+
+
             }
         }
     }
@@ -94,7 +129,9 @@ public class EventListener implements Listener {
 
     private String getPlayerRankWarp(Player player) {
         //Looks at the player as a user based on the unique ID of the player
-        User user = plugin.getLuckPerms().getUserManager().getUser(player.getUniqueId());
+        //Now assign player.getUniqueID() to a UUID object
+        UUID userId = player.getUniqueId();
+        User user = plugin.getLuckPerms().getUserManager().getUser(userId);
 
         if (user != null) {
 
@@ -109,7 +146,7 @@ public class EventListener implements Listener {
             }
         }else{
             //TEST to see if this section of code is reached
-            player.sendMessage("user value is null");
+
         }
         return null;
     }

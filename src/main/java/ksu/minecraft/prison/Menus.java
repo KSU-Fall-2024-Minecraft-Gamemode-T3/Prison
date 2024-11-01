@@ -97,7 +97,9 @@ public class Menus {
         Inventory sellMenu = Bukkit.createInventory(null, 27, Component.text("Sell Items"));
         // Populate sell menu items based on configuration
         ItemStack diamond = new ItemStack(Material.DIAMOND);
-        diamond.getItemMeta().setDisplayName("Diamond\n$50");
+        ItemMeta diamondMeta =  diamond.getItemMeta();
+        diamondMeta.displayName(Component.text("Diamond\n$50"));
+        diamond.setItemMeta(diamondMeta);
         sellMenu.addItem(diamond);
 
         player.openInventory(sellMenu);

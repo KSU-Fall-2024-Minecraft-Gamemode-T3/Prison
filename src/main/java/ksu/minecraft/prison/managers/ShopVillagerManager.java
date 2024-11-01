@@ -15,6 +15,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.entity.Player;
 
 public class ShopVillagerManager {
 
@@ -49,10 +50,9 @@ public class ShopVillagerManager {
     //TEST attempt at changing PlayerInteractAtEntityEvent to PlayerInteractEntityEvent
     public void onPlayerInteract(PlayerInteractEntityEvent event) {
         //Check to see if the entity clicked has the shop key i.e. a villager. Could be a point of issue if the data types aren't right for some reason
-
         if (event.getRightClicked().getPersistentDataContainer().has(plugin.getNamespacedKey("is_shop"), PersistentDataType.BYTE)) {
-            //Prevent moving items into the Shop menu
-            event.setCancelled(true);
+
+            //event.setCancelled(true);
 
             //trying to open new sell menus found in Menus.java
             plugin.getMenus().openSellMenu(event.getPlayer());

@@ -58,9 +58,9 @@ public class EventListener implements Listener {
             }
         }
 
-        //switch cases for the warp menu
+        //Check for warp menu
         if(event.getView().title().equals(Component.text("Warps Menu"))){
-            event.setCancelled(true);  // Prevent moving items in the Prison Menu
+            event.setCancelled(true);  // Prevent moving items in the warp Menu
 
             ItemStack clickedItem = event.getCurrentItem();
             Player player = (Player) event.getWhoClicked();
@@ -70,26 +70,33 @@ public class EventListener implements Listener {
 
                 switch(itemName){
                     case "Warp to D":
+                        player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp d");
                     case "Warp to C":
+                        player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp c");
                     case "Warp to B":
+                        player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp b");
                     case "Warp to A":
+                        player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp a");
                     case "Warp to K":
+                        player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp k");
                     case "Warp to S":
+                        player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp s");
                     case "Warp to U":
+                        player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp u");
                     case "Warp to Cells":
+                        player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp cells");
                     default:
+                        player.closeInventory();
                         player.sendMessage("Sorry, that warp does not exist!");
                 }
-
-
             }
         }
     }

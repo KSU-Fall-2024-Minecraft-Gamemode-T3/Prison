@@ -92,6 +92,15 @@ public class Menus {
         player.openInventory(warpsMenu);
     }
 
+    public void openSellMenu(Player player){
+        //Changed sell menu to be more like the other menus, see Component.text
+        Inventory sellMenu = Bukkit.createInventory(null, 27, Component.text("Sell Items"));
+        // Populate sell menu items based on configuration
+        ItemStack diamond = new ItemStack(Material.DIAMOND);
+        diamond.getItemMeta().setDisplayName("Diamond\n$50");
+        sellMenu.addItem(diamond);
+    }
+
     public void showHelpMenu(Player player) {
         String helpMessage = """
         <green>Prison Plugin Help</green>

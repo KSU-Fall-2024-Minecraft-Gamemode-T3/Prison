@@ -143,23 +143,19 @@ public class EventListener implements Listener {
 
     private String getPlayerRankWarp(Player player) {
         //Looks at the player as a user based on the unique ID of the player
-        //Now assign player.getUniqueID() to a UUID object
-        UUID userId = player.getUniqueId();
-        User user = plugin.getLuckPerms().getUserManager().getUser(userId);
+        User user = plugin.getLuckPerms().getUserManager().getUser(player.getUniqueId());
+        player.sendMessage(Component.text("User is ") + user.getUsername());
 
         if (user != null) {
 
             //If check is successful then take their primary group (rank) and place into string
             String primaryGroup = user.getPrimaryGroup();
 
-
             if (primaryGroup != null && primaryGroup.length() == 1) {
                 return primaryGroup.toUpperCase();
-            }else{ //just in case something weird occured
-                return null;
+            }else if(primaryGroup == "default"){
+                return "D";
             }
-        }else{
-            //TEST to see if this section of code is reached
 
         }
         return null;

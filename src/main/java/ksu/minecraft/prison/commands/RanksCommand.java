@@ -24,7 +24,7 @@ public class RanksCommand implements CommandExecutor {
             player.sendMessage("Your ranks:");
             // Display ranks and prices dynamically from config
             //Edited
-            //Current Issue: Does not read from yml.file, removed a seemingly random period from one of the ranks
+
             plugin.getConfig().getConfigurationSection("ranks").getKeys(false)
                     .forEach(rank -> player.sendMessage(rank + ": $" + plugin.getConfig().getInt("ranks." + rank + ".price")));
 

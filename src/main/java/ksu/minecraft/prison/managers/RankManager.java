@@ -19,11 +19,13 @@ public class RankManager {
     }
 
     public String getCurrentRank(Player player) {
+        //May not work as intended because lucky perms does not really consider what is in the config file
         User user = luckPerms.getUserManager().getUser(player.getUniqueId());
         return user != null ? user.getPrimaryGroup() : null;
     }
 
     public void rankUp(Player player) {
+        //
         String currentRank = getCurrentRank(player); //Tries to look at the player's current rank
         if (currentRank == null) {
             player.sendMessage(Component.text("Could not determine your current rank!"));
@@ -31,18 +33,18 @@ public class RankManager {
         }
 
         // Fetch next rank and price from the config
-       /* FileConfiguration config = plugin.getConfig();
+        FileConfiguration config = plugin.getConfig();
+
+        //issue likely with path defining
         String nextRank = config.getString("ranks." + currentRank + ".next_rank");
         int price = config.getInt("ranks." + currentRank + ".price");
 
-        */
 
-        //Second Attempt
-        String nextRank = plugin.getConfig().getConfigurationSection("ranks").getString("ranks.next_rank");
-        int price = plugin.getConfig().getConfigurationSection("ranks").getInt("ranks." + currentRank + ".price");
+
 
         //Check to see if the player is at U, the highest rank
         if (nextRank == null) {
+            //player.sendMessage(Component.text("Your Current Rank is " + currentRank));
             player.sendMessage(Component.text("You are at the highest rank!"));
             return;
         }

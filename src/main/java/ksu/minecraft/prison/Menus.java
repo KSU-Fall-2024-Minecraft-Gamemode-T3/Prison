@@ -99,6 +99,8 @@ public class Menus {
         ItemStack diamond = new ItemStack(Material.DIAMOND);
         diamond.getItemMeta().setDisplayName("Diamond\n$50");
         sellMenu.addItem(diamond);
+
+        player.openInventory(sellMenu);
     }
 
     public void showHelpMenu(Player player) {

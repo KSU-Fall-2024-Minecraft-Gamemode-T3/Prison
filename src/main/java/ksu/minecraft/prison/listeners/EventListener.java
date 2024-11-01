@@ -66,35 +66,42 @@ public class EventListener implements Listener {
             Player player = (Player) event.getWhoClicked();
 
             if (clickedItem != null && clickedItem.hasItemMeta()){
-                String itemName = MiniMessage.miniMessage().serialize(clickedItem.getItemMeta().displayName());
+                String warpName = MiniMessage.miniMessage().serialize(clickedItem.getItemMeta().displayName());
 
-                switch(itemName){
+                switch(warpName){
                     case "Warp to D":
                         player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp d");
+                        break;
                     case "Warp to C":
                         player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp c");
+                        break;
                     case "Warp to B":
                         player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp b");
+                        break;
                     case "Warp to A":
                         player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp a");
+                        break;
                     case "Warp to K":
                         player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp k");
+                        break;
                     case "Warp to S":
                         player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp s");
+                        break;
                     case "Warp to U":
                         player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp u");
+                        break;
                     case "Warp to Cells":
                         player.closeInventory();
                         plugin.getServer().dispatchCommand(player, "warp cells");
+                        break;
                     default:
-                        player.closeInventory();
                         player.sendMessage("Sorry, that warp does not exist!");
                 }
             }

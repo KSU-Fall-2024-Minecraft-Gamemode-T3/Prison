@@ -9,6 +9,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -41,10 +42,14 @@ public class ShopVillagerManager {
         }
     }
 
+    //Edited
     @EventHandler
-    public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
+    //TEST attempt at changing PlayerInteractAtEntityEvent to PlayerInteractEntityEvent
+    public void onPlayerInteract(PlayerInteractEntityEvent event) {
+        //Check to see if the entity clicked has the shop key i.e. a villager. Could be a point of issue if the data types aren't right for some reason
         if (event.getRightClicked().getPersistentDataContainer().has(plugin.getNamespacedKey("is_shop"), PersistentDataType.BYTE)) {
-            event.setCancelled(true);
+            //Don't know what is getting cancelled before anything is happening? could be the reason a menu doesn't show up.
+            //event.setCancelled(true);
             Inventory sellMenu = Bukkit.createInventory(null, 27, "Sell Items");
             // Populate sell menu items based on configuration
             ItemStack diamond = new ItemStack(Material.DIAMOND);

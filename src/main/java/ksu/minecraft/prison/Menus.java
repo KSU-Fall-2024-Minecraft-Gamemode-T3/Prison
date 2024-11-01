@@ -21,11 +21,15 @@ public class Menus {
     public void openPrisonMenu(Player player) {
         Inventory prisonMenu = Bukkit.createInventory(null, 9, Component.text("Prison Menu"));
 
+        //Commented out emerald since that is kind of unneccesary now
+        /*
         ItemStack emerald = new ItemStack(Material.EMERALD);
         ItemMeta emeraldMeta = emerald.getItemMeta();
         emeraldMeta.displayName(Component.text("Sell All Items"));
         emerald.setItemMeta(emeraldMeta);
         prisonMenu.setItem(0, emerald);
+         */
+        //Edited
 
         ItemStack compass = new ItemStack(Material.COMPASS);
         ItemMeta compassMeta = compass.getItemMeta();

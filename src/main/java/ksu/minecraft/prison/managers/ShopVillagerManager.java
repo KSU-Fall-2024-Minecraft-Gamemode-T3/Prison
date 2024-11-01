@@ -46,10 +46,12 @@ public class ShopVillagerManager {
         }
     }
 
+
+
     //Edited
     @EventHandler
     //TEST attempt at changing PlayerInteractAtEntityEvent to PlayerInteractEntityEvent
-    public void onPlayerInteract(PlayerInteractEntityEvent event) {
+    public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
         Player player = event.getPlayer();
         //Check to see if the entity clicked has the shop key i.e. a villager. Could be a point of issue if the data types aren't right for some reason
         if (event.getRightClicked().getPersistentDataContainer().has(plugin.getNamespacedKey("is_shop"), PersistentDataType.BYTE)) {

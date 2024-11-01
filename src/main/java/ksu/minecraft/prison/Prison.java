@@ -13,7 +13,10 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.luckperms.api.LuckPerms;
@@ -41,16 +44,20 @@ public final class Prison extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        //Initialize configuration settings from the .yml files
         getLogger().info("Prison plugin has been enabled!");
         this.config = this.loadConfigFile("config.yml");
         this.minesConfig = this.loadConfigFile("mines.yml");
 
+        //Initalize all plugins
         luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         economyManager = new EconomyManager(this);
         rankManager = new RankManager(this, luckPerms);
         mineManager = new MineManager(this);
         shopVillagerManager = new ShopVillagerManager(this);
         menus = new Menus(this);
+
+
 
         RegisteredServiceProvider<LuckPerms> provider = getServer().getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null) {
@@ -63,8 +70,18 @@ public final class Prison extends JavaPlugin {
 
 
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
+
+        //This for loop will attempt to remove all the shop villagers before populating the world with them
+        //otherwise multiple villagers will spawn on top of each other.
+        for(Entity entity : Bukkit.getWorld("world").getEntities()){
+            if(entity instanceof  Villager){
+                entity.remove();
+            }
+        }
         shopVillagerManager.spawnShopVillagers(); // Spawn shop villagers
 
+
+        //Mine timer
         getServer().getScheduler().runTaskTimer(this, () -> mineManager.monitorMines(), 0L, 20L * 60); // Every minute
     }
 
@@ -87,10 +104,11 @@ public final class Prison extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        //List of in game commands that players can write and their functions
         if (sender instanceof Player) {
             Player player = (Player) sender;
 
-            if (command.getName().equalsIgnoreCase("prison")) {
+            if (command.getName().equalsIgnoreCase("prison")) { //shows basic lists of commands, some maybe only for admins
                 if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
                     sendHelpMenu(player);
                     return true;
@@ -152,9 +170,15 @@ public final class Prison extends JavaPlugin {
     }
 
     private void openPrisonMenu(Player player) {
+        //With the compass item implemented, this method will open that instead
+        /*
         Inventory prisonMenu = Bukkit.createInventory(null, 27, Component.text("Prison Menu"));
         // Populate the prison menu with items (example items here)
         player.openInventory(prisonMenu);
+         */
+
+        //opens compass prison menu for player
+        this.getMenus().openPrisonMenu(player);
     }
 
     public NamespacedKey getNamespacedKey(String key) {

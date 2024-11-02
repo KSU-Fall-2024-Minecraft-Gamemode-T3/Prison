@@ -31,6 +31,12 @@ public class RankManager {
             player.sendMessage(Component.text("Could not determine your current rank!"));
             return;
         }
+        //For a d rank player, their current rank when issuing the command,
+        //is just 'default' which will cause problems so we convert the current
+        //rank to d in this instance
+        if(currentRank.equals("default")){
+            currentRank = "D";
+        }
 
         // Fetch next rank and price from the config
         FileConfiguration config = plugin.getConfig();
@@ -38,6 +44,8 @@ public class RankManager {
         //issue likely with path defining
         String nextRank = config.getString("ranks." + currentRank + ".next_rank");
         int price = config.getInt("ranks." + currentRank + ".price");
+        player.sendMessage(Component.text(price));
+
 
 
 

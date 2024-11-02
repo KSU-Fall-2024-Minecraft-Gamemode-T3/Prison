@@ -42,8 +42,8 @@ public class RankManager {
         FileConfiguration config = plugin.getConfig();
 
         //issue likely with path defining
-        String nextRank = config.getString("ranks." + currentRank + ".next_rank");
-        int price = config.getInt("ranks." + currentRank + ".price");
+        String nextRank = config.getString("ranks." + currentRank.toUpperCase() + ".next_rank");
+        int price = config.getInt("ranks." + currentRank.toUpperCase() + ".price");
         //player.sendMessage(Component.text(price));
 
 

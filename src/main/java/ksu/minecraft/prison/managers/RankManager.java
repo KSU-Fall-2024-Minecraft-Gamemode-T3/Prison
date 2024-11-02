@@ -44,7 +44,7 @@ public class RankManager {
         //issue likely with path defining
         String nextRank = config.getString("ranks." + currentRank + ".next_rank");
         int price = config.getInt("ranks." + currentRank + ".price");
-        player.sendMessage(Component.text(price));
+        //player.sendMessage(Component.text(price));
 
 
 

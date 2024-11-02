@@ -9,6 +9,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
@@ -17,18 +18,49 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import net.kyori.adventure.text.Component;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class SellMenuListener implements Listener {
-
+    private final JavaPlugin plugin;
+    private final EconomyManager economyManager;
+    public SellMenuListener(JavaPlugin plugin, EconomyManager economyManager) {
+        this.plugin = plugin;
+        this.economyManager = economyManager;
+    }
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        // Check if the inventory is the sell menu
+        // TODO confirm this is a inventory holder
+        if (event.getView().title().equals(Component.text("Sell Items"))) {
+            event.setCancelled(true);
+            Player player = (Player) event.getWhoClicked();
+            ItemStack clickedItem = event.getCurrentItem();
+            if (clickedItem != null && clickedItem.getType() != Material.AIR) {
+                Material material = clickedItem.getType();
+                if (plugin.getConfig().contains("sellable-items." + material.name())) {
+                    double price = plugin.getConfig().getDouble("sellable-items." + material.name() + ".price");
+                    if (player.getInventory().contains(material)) {
+                        player.getInventory().removeItem(new ItemStack(material, 1));
+                        economyManager.depositMoney(player, price);
+                        player.sendMessage("You sold 1 " + material.name() + " for $" + price);
+                    } else {
+                        player.sendMessage("You don't have any " + material.name() + " to sell.");
+                    }
+                }
+            }
+        }
+    }
+    /*
     private final Prison plugin;
+
 
     public SellMenuListener(Prison plugin, EconomyManager economyManager) {
         this.plugin = plugin;
     }
 
-    /**
-     * Creates a Sell Menu inventory with a custom InventoryHolder
-     */
+
+     // Creates a Sell Menu inventory with a custom InventoryHolder
+
     public Inventory createSellMenu() {
         Inventory sellInventory = Bukkit.createInventory(new SellMenuHolder(), 27, Component.text("Sell Items"));
 
@@ -45,9 +77,9 @@ public class SellMenuListener implements Listener {
         return sellInventory;
     }
 
-    /**
-     * Opens the Sell Menu
-     */
+
+     //Opens the Sell Menu
+
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent event) {
         if (event.getInventory().getHolder() instanceof SellMenuHolder) {
@@ -55,9 +87,9 @@ public class SellMenuListener implements Listener {
         }
     }
 
-    /**
-     * Handles clicks within the Sell Menu
-     */
+
+     //Handles clicks within the Sell Menu
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         // Check if the inventory is the Sell Menu by checking the InventoryHolder
@@ -83,13 +115,15 @@ public class SellMenuListener implements Listener {
         }
     }
 
-    /**
-     * Handles Sell Menu close event
-     */
+
+     //Handles Sell Menu close event
+
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getInventory().getHolder() instanceof SellMenuHolder) {
             event.getPlayer().sendMessage(Component.text("Thank you for using the Sell Menu!"));
         }
     }
+
+     */
 }

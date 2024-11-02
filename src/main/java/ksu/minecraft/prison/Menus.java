@@ -94,6 +94,8 @@ public class Menus {
 
     public void openSellMenu(Player player){
         //Changed sell menu to be more like the other menus, see Component.text
+
+        /*
         Inventory sellMenu = Bukkit.createInventory(null, 27, Component.text("Sell Items"));
         // Populate sell menu items based on configuration
         ItemStack diamond = new ItemStack(Material.DIAMOND);
@@ -102,6 +104,27 @@ public class Menus {
         diamond.setItemMeta(diamondMeta);
         sellMenu.addItem(diamond);
 
+        player.openInventory(sellMenu);
+         */
+
+        // TODO Make sure this is a inventory holder
+        Inventory sellMenu = Bukkit.createInventory(null, 27, Component.text("Sell Items"));
+
+        int slot = 0;
+        for (String itemName : plugin.getConfig().getConfigurationSection("sellable-items").getKeys(false)) {
+            Material material = Material.getMaterial(itemName);
+
+            if (material != null) {
+                double price = plugin.getConfig().getDouble("sellable-items." + itemName + ".price");
+
+                ItemStack displayItem = new ItemStack(material);
+                ItemMeta meta = displayItem.getItemMeta();
+                meta.displayName(Component.text(material.name() + " - $" + price));
+                displayItem.setItemMeta(meta);
+                sellMenu.setItem(slot, displayItem);
+                slot++;
+            }
+        }
         player.openInventory(sellMenu);
     }
 

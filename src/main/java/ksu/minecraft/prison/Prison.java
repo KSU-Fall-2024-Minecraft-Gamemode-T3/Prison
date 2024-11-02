@@ -4,6 +4,7 @@ import ksu.minecraft.prison.commands.CellsCommand;
 import ksu.minecraft.prison.commands.MineResetCommand;
 import ksu.minecraft.prison.commands.RanksCommand;
 import ksu.minecraft.prison.listeners.EventListener;
+import ksu.minecraft.prison.listeners.ShopListener;
 import ksu.minecraft.prison.managers.EconomyManager;
 import ksu.minecraft.prison.managers.MineManager;
 import ksu.minecraft.prison.managers.RankManager;
@@ -28,6 +29,7 @@ import org.bukkit.Bukkit;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public final class Prison extends JavaPlugin {
 
@@ -59,6 +61,8 @@ public final class Prison extends JavaPlugin {
 
 
 
+
+
         RegisteredServiceProvider<LuckPerms> provider = getServer().getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null) {
             luckPerms = provider.getProvider();
@@ -70,10 +74,12 @@ public final class Prison extends JavaPlugin {
 
 
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        getServer().getPluginManager().registerEvents(new ShopListener(this), this);
+        getServer().getPluginManager().registerEvents(new ksu.minecraft.prison.listeners.SellMenuListener(this, economyManager), this);
 
         //This for loop will attempt to remove all the shop villagers before populating the world with them
         //otherwise multiple villagers will spawn on top of each other.
-        for(Entity entity : Bukkit.getWorld("world").getEntities()){
+        for(Entity entity : Objects.requireNonNull(Bukkit.getWorld("world")).getEntities()){
             if(entity instanceof  Villager){
                 entity.remove();
             }

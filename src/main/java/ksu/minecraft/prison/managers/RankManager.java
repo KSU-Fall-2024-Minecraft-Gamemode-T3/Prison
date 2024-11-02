@@ -41,7 +41,7 @@ public class RankManager {
         // Fetch next rank and price from the config
         FileConfiguration config = plugin.getConfig();
 
-        //issue likely with path defining
+        //Make sure the current rank is uppercase just like how it is in the config file
         String nextRank = config.getString("ranks." + currentRank.toUpperCase() + ".next_rank");
         int price = config.getInt("ranks." + currentRank.toUpperCase() + ".price");
         //player.sendMessage(Component.text(price));
@@ -50,9 +50,9 @@ public class RankManager {
 
 
 
-        //Check to see if the player is at U, the highest rank
+        //Check to see if the player is at U, the highest rank, there shouldn't be another
+        //rank in the config file here
         if (nextRank == null) {
-            //player.sendMessage(Component.text("Your Current Rank is " + currentRank));
             player.sendMessage(Component.text("You are at the highest rank!"));
             return;
         }

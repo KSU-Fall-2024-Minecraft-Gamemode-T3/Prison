@@ -7,16 +7,25 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import net.luckperms.api.model.user.User;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.UUID;
 
 public class EventListener implements Listener {
+    /*
+    ---------------------------------------
+            Common Player Listeners
+    ---------------------------------------
+     */
+
 
     private final Prison plugin;
 
@@ -129,6 +138,8 @@ public class EventListener implements Listener {
         }
     }
 
+
+
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         ItemStack droppedItem = event.getItemDrop().getItemStack();
@@ -160,4 +171,5 @@ public class EventListener implements Listener {
         }
         return null;
     }
+
 }

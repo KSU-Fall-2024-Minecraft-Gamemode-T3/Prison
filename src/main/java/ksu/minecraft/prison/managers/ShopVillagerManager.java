@@ -19,6 +19,8 @@ import org.bukkit.entity.Player;
 
 public class ShopVillagerManager {
 
+    //initiates and spawns shop villagers
+
     private final Prison plugin;
 
     public ShopVillagerManager(Prison plugin) {
@@ -59,11 +61,12 @@ public class ShopVillagerManager {
             //event.setCancelled(true);
 
             //trying to open new sell menus found in Menus.java
+            player.sendMessage(Component.text("Entity is recognized as 'is_shop'"));
             plugin.getMenus().openSellMenu(player);
 
             //event.getPlayer().openInventory(sellMenu);
         }else{
-            player.sendMessage("Entity not detected as 'is_shop'");
+            player.sendMessage(Component.text("Entity is not recognized as 'is_shop'"));
             plugin.getMenus().openSellMenu(player);
         }
     }

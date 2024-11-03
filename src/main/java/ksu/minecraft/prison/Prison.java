@@ -181,6 +181,8 @@ public final class Prison extends JavaPlugin {
         MiniMessage mm = MiniMessage.miniMessage();
 
         Component ksuMessage = mm.deserialize("<hover:show_text: Check out the CCSE website, that's where we're from!><yellow>G<green>o <yellow>K<green>S<yellow>U<green>!<click:open_url:'https://www.kennesaw.edu/ccse/index.php'></click>");
+
+        player.sendMessage(ksuMessage);
     }
 
     private void openPrisonRanksMenu(Player player) {

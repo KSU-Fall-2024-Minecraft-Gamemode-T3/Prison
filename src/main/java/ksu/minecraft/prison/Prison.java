@@ -2,6 +2,7 @@ package ksu.minecraft.prison;
 
 import ksu.minecraft.prison.commands.CellsCommand;
 import ksu.minecraft.prison.commands.MineResetCommand;
+import ksu.minecraft.prison.commands.MinesCommand;
 import ksu.minecraft.prison.commands.RanksCommand;
 import ksu.minecraft.prison.listeners.EventListener;
 import ksu.minecraft.prison.listeners.ShopListener;
@@ -51,6 +52,8 @@ public final class Prison extends JavaPlugin {
         this.config = this.loadConfigFile("config.yml");
         this.minesConfig = this.loadConfigFile("mines.yml");
 
+        //Test to see if mines.yml exists
+
         //Initalize all plugins
         luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         economyManager = new EconomyManager(this);
@@ -69,6 +72,7 @@ public final class Prison extends JavaPlugin {
         }
 
         this.getCommand("minereset").setExecutor(new MineResetCommand(mineManager));
+        this.getCommand("mines").setExecutor(new MinesCommand(this, mineManager));
         this.getCommand("cells").setExecutor(new CellsCommand(this));
         this.getCommand("ranks").setExecutor(new RanksCommand(this, rankManager));
 
@@ -121,6 +125,9 @@ public final class Prison extends JavaPlugin {
                 } else if (args.length > 0 && args[0].equalsIgnoreCase("ranks")) {
                     openPrisonRanksMenu(player);
                     return true;
+                } else if(args.length > 0 && args[0].equalsIgnoreCase("ksu")){
+                    goKSU(player);
+                    return true;
                 } else {
                     openPrisonMenu(player);
                     return true;
@@ -163,10 +170,17 @@ public final class Prison extends JavaPlugin {
             <hover:show_text:'<yellow>Rank up if you can afford it'><click:run_command:/rankup>/rankup</click></hover> - Rank up
             <hover:show_text:'<yellow>View and rent a cell'><click:run_command:/cells>/cells</click></hover> - Rent a cell in the prison
             <hover:show_text:'<yellow>List and manage available mines (admin only)'><click:run_command:/mines>/mines</click></hover> - Manage mines
-            <hover:show_text:'<yellow>Manually reset a specific mine (admin only)'><click:run_command:/minereset <minename>>/minereset <minename></click></hover> - Reset specific mine
+            <hover:show_text:'<yellow>Manually reset a specific mine (admin only)'><click:run_command:/minereset <minename>/minereset <minename></click></hover> - Reset specific mine
         """);
 
         player.sendMessage(helpMessage);
+    }
+
+    //Takes player to KSU CCSE page for fun.
+    private void goKSU(Player player){
+        MiniMessage mm = MiniMessage.miniMessage();
+
+        Component ksuMessage = mm.deserialize("<hover:show_text: Check out the CCSE website, that's where we're from!><yellow>G<green>o <yellow>K<green>S<yellow>U<green>!<click:open_url:'https://www.kennesaw.edu/ccse/index.php'></click>");
     }
 
     private void openPrisonRanksMenu(Player player) {

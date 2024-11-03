@@ -8,29 +8,45 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.kyori.adventure.text.Component;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
 
 public class MinesCommand implements CommandExecutor {
 
     private final JavaPlugin plugin;
+    private final MineManager mineManager;
+
+
 
     public MinesCommand(JavaPlugin plugin, MineManager mineManager) {
         this.plugin = plugin;
+        this.mineManager = mineManager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        File dir = plugin.getDataFolder();
+        File mineFile = new File(dir, "mines.yml");
 
+        Player player = (Player) sender;
+        FileConfiguration config = YamlConfiguration.loadConfiguration(mineFile);
+
+
+        if (sender instanceof Player) {
+
+            //Test Command
+            // player.sendMessage("This command can only be run by players.");
             if (args.length == 0) {
-                FileConfiguration minesConfig = plugin.getConfig();
-                if (minesConfig.contains("mines")) {
+                //FileConfiguration minesConfig = plugin.getConfig();
+                if (config.contains("mines")) {
                     player.sendMessage(Component.text("Mines:"));
-                    for (String mineName : minesConfig.getConfigurationSection("mines").getKeys(false)) {
-                        String name = minesConfig.getString("mines." + mineName + ".name", "Unnamed Mine");
+                    for (String mineName : config.getConfigurationSection("mines").getKeys(false)) {
+                        String name = config.getString("mines." + mineName + ".name", "Unnamed Mine");
                         player.sendMessage(Component.text("Mine: " + name));
                     }
                 } else {
+                    //Message that should only occur if the mines.yml file is not discovered in the plugins/Prison folder
                     player.sendMessage(Component.text("No mines found in configuration."));
                 }
             } else if (args.length == 1 && args[0].equalsIgnoreCase("reset")) {
@@ -39,7 +55,7 @@ public class MinesCommand implements CommandExecutor {
 
             return true;
         }
-        sender.sendMessage("This command can only be run by players.");
+
         return false;
     }
 }

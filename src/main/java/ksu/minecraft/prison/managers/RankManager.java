@@ -19,7 +19,6 @@ public class RankManager {
     }
 
     public String getCurrentRank(Player player) {
-        //May not work as intended because lucky perms does not really consider what is in the config file
         User user = luckPerms.getUserManager().getUser(player.getUniqueId());
         return user != null ? user.getPrimaryGroup() : null;
     }
@@ -44,10 +43,6 @@ public class RankManager {
         //Make sure the current rank is uppercase just like how it is in the config file
         String nextRank = config.getString("ranks." + currentRank.toUpperCase() + ".next_rank");
         int price = config.getInt("ranks." + currentRank.toUpperCase() + ".price");
-        //player.sendMessage(Component.text(price));
-
-
-
 
 
         //Check to see if the player is at U, the highest rank, there shouldn't be another

@@ -1,6 +1,7 @@
 package ksu.minecraft.prison.managers;
 
 import ksu.minecraft.prison.Prison;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -81,21 +82,24 @@ public class MineManager {
      * @return true if the reset was successful, false otherwise
      */
     public boolean resetMineCommand(String mineName, Player player) {
-        if (!minesConfig.contains(mineName)) {
+        //Define the path in the mines.yml folder to connect with the name of the mine
+        //the admin puts in.
+        if (!minesConfig.contains("mines." + mineName)) {
             if (player != null) {
-                player.sendMessage(ChatColor.RED + "Mine '" + mineName + "' does not exist.");
+                player.sendMessage(Component.text(ChatColor.RED + "Mine '" + mineName + "' does not exist."));
             }
             return false;
         }
 
         // Retrieve the mine boundaries and material from config
-        int x1 = minesConfig.getInt(mineName + ".x1");
-        int y1 = minesConfig.getInt(mineName + ".y1");
-        int z1 = minesConfig.getInt(mineName + ".z1");
-        int x2 = minesConfig.getInt(mineName + ".x2");
-        int y2 = minesConfig.getInt(mineName + ".y2");
-        int z2 = minesConfig.getInt(mineName + ".z2");
-        String materialName = minesConfig.getString(mineName + ".material", "STONE");
+        // Retrieves the max dimentions first before the min
+        int x1 = minesConfig.getInt("mines." + mineName + ".maxX");
+        int y1 = minesConfig.getInt("mines." + mineName + ".maxY");
+        int z1 = minesConfig.getInt("mines." + mineName + ".maxZ");
+        int x2 = minesConfig.getInt("mines." + mineName + ".minX");
+        int y2 = minesConfig.getInt("mines." + mineName + ".minY");
+        int z2 = minesConfig.getInt("mines." + mineName + ".minZ");
+        String materialName = minesConfig.getString("mines." + mineName + ".material", "STONE");
 
         Material material = Material.matchMaterial(materialName);
         if (material == null) {
@@ -124,7 +128,7 @@ public class MineManager {
         }
 
         if (player != null) {
-            player.sendMessage(ChatColor.GREEN + "Mine '" + mineName + "' has been successfully reset.");
+            player.sendMessage(Component.text(ChatColor.GREEN + "Mine '" + mineName + "' has been successfully reset."));
         }
         return true;
     }
@@ -170,7 +174,9 @@ public class MineManager {
 
             // Calculate the percentage of target material remaining
             double percentage = (targetBlocks * 100.0) / blockCount;
-            int threshold = minesConfig.getInt(mineName + ".reset_threshold", 35); // default threshold of 35%
+
+            //Checks the threshold percent in mines.mineName.resetThreshold
+            int threshold = minesConfig.getInt("mines." + mineName + ".reset_threshold", 35); // default threshold of 35%
 
             if (percentage < threshold) {
                 // Reset the mine if below threshold

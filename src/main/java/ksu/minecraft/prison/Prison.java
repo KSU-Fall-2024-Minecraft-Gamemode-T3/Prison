@@ -5,6 +5,7 @@ import ksu.minecraft.prison.commands.MineResetCommand;
 import ksu.minecraft.prison.commands.MinesCommand;
 import ksu.minecraft.prison.commands.RanksCommand;
 import ksu.minecraft.prison.listeners.EventListener;
+import ksu.minecraft.prison.listeners.SellMenuListener;
 import ksu.minecraft.prison.listeners.ShopListener;
 import ksu.minecraft.prison.managers.EconomyManager;
 import ksu.minecraft.prison.managers.MineManager;
@@ -13,12 +14,14 @@ import ksu.minecraft.prison.managers.ShopVillagerManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.luckperms.api.LuckPerms;
@@ -44,6 +47,7 @@ public final class Prison extends JavaPlugin {
     private FileConfiguration minesConfig;
     private FileConfiguration config;
     private Menus menus;
+    public static World world;
 
     @Override
     public void onEnable() {
@@ -54,18 +58,18 @@ public final class Prison extends JavaPlugin {
 
         //Test to see if mines.yml exists
 
-        //Initalize all plugins
+        //Initalize all plugins + managers
         luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         economyManager = new EconomyManager(this);
         rankManager = new RankManager(this, luckPerms);
         mineManager = new MineManager(this);
         shopVillagerManager = new ShopVillagerManager(this);
-        menus = new Menus(this);
+        menus = new Menus(this, economyManager);
 
 
 
 
-
+        //check for luckperms to make sure the server has the plugin
         RegisteredServiceProvider<LuckPerms> provider = getServer().getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null) {
             luckPerms = provider.getProvider();
@@ -79,16 +83,11 @@ public final class Prison extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
         getServer().getPluginManager().registerEvents(new ShopListener(this), this);
-        getServer().getPluginManager().registerEvents(new ksu.minecraft.prison.listeners.SellMenuListener(this, economyManager), this);
+        getServer().getPluginManager().registerEvents(new SellMenuListener(this, economyManager), this);
 
-        //This for loop will attempt to remove all the shop villagers before populating the world with them
-        //otherwise multiple villagers will spawn on top of each other.
-        for(Entity entity : Objects.requireNonNull(Bukkit.getWorld("world")).getEntities()){
-            if(entity instanceof  Villager){
-                entity.remove();
-            }
-        }
-        shopVillagerManager.spawnShopVillagers(); // Spawn shop villagers
+
+        this.world = Bukkit.getWorld("world");
+        spawnVillagers();
 
 
         //Mine timer
@@ -170,17 +169,34 @@ public final class Prison extends JavaPlugin {
             <hover:show_text:'<yellow>Rank up if you can afford it'><click:run_command:/rankup>/rankup</click></hover> - Rank up
             <hover:show_text:'<yellow>View and rent a cell'><click:run_command:/cells>/cells</click></hover> - Rent a cell in the prison
             <hover:show_text:'<yellow>List and manage available mines (admin only)'><click:run_command:/mines>/mines</click></hover> - Manage mines
-            <hover:show_text:'<yellow>Manually reset a specific mine (admin only)'><click:run_command:/minereset <minename>/minereset <minename></click></hover> - Reset specific mine
+            <hover:show_text:'<yellow>Manually reset a specific mine (admin only)'><click:run_command:/minereset <minename>>/minereset <minename></click></hover> - Reset specific mine
         """);
 
         player.sendMessage(helpMessage);
     }
 
-    //Takes player to KSU CCSE page for fun.
+    private void spawnVillagers(){
+        //This for loop will attempt to remove all the shop villagers before populating the world with them
+        //otherwise multiple villagers will spawn on top of each other.
+        if(world != null){
+            for(Entity entity : world.getEntities()){
+                //TODO Target only shop villagers
+                //This code should only target shop villagers but more keep getting added with each server reset.
+                //Either not every villager is assigned the 'is_shop' key properly or more villagers are being called
+                //from another command which shouldn't be possible
+                if(entity.getPersistentDataContainer().has(this.getNamespacedKey("is_shop"), PersistentDataType.BYTE)){
+                    entity.remove();
+                }
+            }
+        }
+        shopVillagerManager.spawnShopVillagers(world); // Spawn shop villagers
+    }
+
+
     private void goKSU(Player player){
         MiniMessage mm = MiniMessage.miniMessage();
 
-        Component ksuMessage = mm.deserialize("<hover:show_text: Check out the CCSE website, that's where we're from!><yellow>G<green>o <yellow>K<green>S<yellow>U<green>!<click:open_url:'https://www.kennesaw.edu/ccse/index.php'></click>");
+        Component ksuMessage = mm.deserialize("<hover:show_text: Check out the CCSE website, that's where we're from!><yellow>G<green>o <yellow>K<green>S<yellow>U<green>!");
 
         player.sendMessage(ksuMessage);
     }

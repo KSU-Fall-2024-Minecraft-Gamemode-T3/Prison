@@ -1,11 +1,14 @@
 package ksu.minecraft.prison;
 
+import ksu.minecraft.prison.listeners.SellMenuHolder;
+import ksu.minecraft.prison.managers.EconomyManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -13,13 +16,16 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class Menus {
 
     private final Prison plugin;
+    private final EconomyManager economyManager;
 
-    public Menus(Prison plugin) {
+    public Menus(Prison plugin, EconomyManager economyManager) {
         this.plugin = plugin;
+        this.economyManager = economyManager;
     }
 
     public void openPrisonMenu(Player player) {
         Inventory prisonMenu = Bukkit.createInventory(null, 9, Component.text("Prison Menu"));
+
 
         //Commented out emerald since that is kind of unneccesary now
         /*
@@ -107,8 +113,30 @@ public class Menus {
         player.openInventory(sellMenu);
          */
 
-        // TODO Make sure this is a inventory holder
+        // Using the Inventories class for first time
         Inventory sellMenu = Bukkit.createInventory(null, 27, Component.text("Sell Items"));
+        SellMenuHolder sellM = new SellMenuHolder() {
+            @Override
+            public void onClick(InventoryClickEvent event) {
+                event.setCancelled(true);
+                ItemStack clickedItem = event.getCurrentItem();
+                if (clickedItem != null && clickedItem.getType() != Material.AIR) {
+                    Material material = clickedItem.getType();
+                    if (plugin.getConfig().contains("sellable-items." + material.name())) {
+                        double price = plugin.getConfig().getDouble("sellable-items." + material.name() + ".price");
+                        if (player.getInventory().contains(material)) {
+                            player.getInventory().removeItem(new ItemStack(material, 1));
+                            economyManager.depositMoney(player, price);
+                            player.sendMessage("You sold 1 " + material.name() + " for $" + price);
+                        } else {
+                            player.sendMessage("You don't have any " + material.name() + " to sell.");
+                        }
+                    }
+                }
+            }
+        };
+
+        sellM.createInventory(27, "Sell Items");
 
         int slot = 0;
         for (String itemName : plugin.getConfig().getConfigurationSection("sellable-items").getKeys(false)) {
@@ -119,13 +147,18 @@ public class Menus {
 
                 ItemStack displayItem = new ItemStack(material);
                 ItemMeta meta = displayItem.getItemMeta();
+
+
                 meta.displayName(Component.text(material.name() + " - $" + price));
                 displayItem.setItemMeta(meta);
-                sellMenu.setItem(slot, displayItem);
+
+                sellM.inventory.setItem(slot, displayItem);
+                //sellMenu.setItem(slot, displayItem);
                 slot++;
             }
         }
-        player.openInventory(sellMenu);
+        //player.openInventory(sellMenu);
+        player.openInventory(sellM.inventory);
     }
 
     public void showHelpMenu(Player player) {

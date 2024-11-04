@@ -4,20 +4,17 @@ import ksu.minecraft.prison.Prison;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import net.luckperms.api.model.user.User;
-import org.bukkit.persistence.PersistentDataType;
 
-import java.util.UUID;
 
 public class EventListener implements Listener {
     /*
@@ -28,9 +25,10 @@ public class EventListener implements Listener {
 
 
     private final Prison plugin;
-
+    private final World world;
     public EventListener(Prison plugin) {
         this.plugin = plugin;
+        this.world = Prison.world;
     }
 
     @EventHandler
@@ -115,14 +113,19 @@ public class EventListener implements Listener {
                 }
             }
         }
+
+
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        //Give all players the prison menu (compass)
         Player player = event.getPlayer();
+
         ItemStack compass = new ItemStack(Material.COMPASS);
         compass.editMeta(meta -> meta.displayName(Component.text("Prison Menu")));
         player.getInventory().setItem(8, compass); // Last hotbar slot
+
     }
 
     @EventHandler
@@ -165,6 +168,7 @@ public class EventListener implements Listener {
             if (primaryGroup != null && primaryGroup.length() == 1) {
                 return primaryGroup.toUpperCase();
             }else if(primaryGroup.equals("default")){
+                //Luckperms uses default as the first rank, better to change it to D
                 return "D";
             }
 

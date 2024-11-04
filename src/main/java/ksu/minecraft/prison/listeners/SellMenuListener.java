@@ -3,22 +3,20 @@ package ksu.minecraft.prison.listeners;
 
 import ksu.minecraft.prison.Prison;  // Adjust this import to match your main plugin class package
 import ksu.minecraft.prison.managers.EconomyManager;
-import org.bukkit.Bukkit;
+
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
+
+
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
-import net.kyori.adventure.text.Component;
 import org.bukkit.plugin.java.JavaPlugin;
+
 
 public class SellMenuListener implements Listener {
     private final JavaPlugin plugin;
@@ -29,8 +27,28 @@ public class SellMenuListener implements Listener {
     }
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        // Check if the inventory is the sell menu
-        // TODO confirm this is a inventory holder
+        //Check if the player is interacting with a menu that is not the custom menu, if so do nothing.
+        if(!(event.getInventory().getHolder(false) instanceof SellMenuHolder inv)){
+            return;
+        }
+
+        //Check if the player is clicking in the custom menu, if not, prevent them from using
+        //shift clicking or pressing a number in the custom menu to stop an issue where a player
+        //will put their items into the shop menu and be unable to get it back
+        if(event.getClickedInventory() == null || event.getClickedInventory().getType() == InventoryType.PLAYER ){
+            if(!(event.isShiftClick() || event.getClick() == ClickType.NUMBER_KEY)){
+                return;
+            }
+        }
+
+        //Check that allows the player to move items in their inventory while the custom menu is open,
+        if(event.getCurrentItem() == null  && event.getCursor().getType() == Material.AIR){
+            return;
+        }
+
+        inv.onClick(event);
+
+        /*
         if (event.getView().title().equals(Component.text("Sell Items"))) {
             event.setCancelled(true);
             Player player = (Player) event.getWhoClicked();
@@ -49,7 +67,21 @@ public class SellMenuListener implements Listener {
                 }
             }
         }
+
+         */
     }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        if (!(event.getInventory().getHolder(false) instanceof SellMenuHolder)) {
+            //player.sendMessage(Component.text("Greetings from message 4!"));
+            return;
+        }
+        event.setCancelled(true);
+    }
+
+
     /*
     private final Prison plugin;
 

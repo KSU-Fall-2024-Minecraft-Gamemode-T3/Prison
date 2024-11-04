@@ -4,34 +4,49 @@ import ksu.minecraft.prison.Prison;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.entity.Player;
+
+
+import java.util.List;
 
 public class ShopVillagerManager {
 
     //initiates and spawns shop villagers
 
     private final Prison plugin;
+    private static int count = 0;
 
     public ShopVillagerManager(Prison plugin) {
         this.plugin = plugin;
     }
 
-    public void spawnShopVillagers() {
-        World world = Bukkit.getWorld("world"); // Change world name if different
-        if (world == null) return;
+    public void spawnShopVillagers(World world) {
 
-        double[][] coords = {
+        if (world == null) return;
+        List<Location> villagerSpawnLocations = List.of(
+                new Location(world, 190.5, 117, -274.5), //Shop Villager in D
+                new Location(world, 228.5, 117, -318.5), //Shop Villager in C - Note: Dupes Spawn
+                new Location(world, 216.5, 117, -213.5), //Shop Villager in B
+                new Location(world, 192.5, 117, -238.5), //Shop Villager in A
+                new Location(world, 262.5, 108, -236.5), //Shop Villager in K - Note: Dupes Spawn
+                new Location(world, 174.5, 104, -243.5), //Shop Villager in S
+                new Location(world, 278.5, 117, -282.5)  //Shop Villager in U - Note: Dupes Spawn
+        );
+
+        for(Location location : villagerSpawnLocations){
+            Villager villager = (Villager) world.spawnEntity(location, EntityType.VILLAGER);
+            villager.setAI(false); // Disable movement
+            villager.setCustomName("Shop");
+            villager.setCustomNameVisible(true);
+            villager.getPersistentDataContainer().set(plugin.getNamespacedKey("is_shop"), PersistentDataType.BYTE, (byte) 1);
+        }
+
+        /*double[][] coords = {
                 {190.5, 117, -274.5}, {228.5, 117, -318.5}, {216.5, 117, -213.5},
                 {192.5, 117, -238.5}, {262.5, 108, -236.5}, {174.5, 104, -243.5},
                 {278.5, 117, -282.5}
@@ -44,14 +59,18 @@ public class ShopVillagerManager {
             villager.setCustomName("Shop");
             villager.setCustomNameVisible(true);
             villager.getPersistentDataContainer().set(plugin.getNamespacedKey("is_shop"), PersistentDataType.BYTE, (byte) 1);
-
         }
+
+         */
     }
 
 
 
-    //Edited
-    @EventHandler
+
+
+    //Commented out since there is no listener here
+
+    /*@EventHandler
     //TEST attempt at changing PlayerInteractAtEntityEvent to PlayerInteractEntityEvent
     public void onPlayerInteract(PlayerInteractAtEntityEvent event){
         Player player = event.getPlayer();
@@ -76,4 +95,6 @@ public class ShopVillagerManager {
     public void onEntityDamage(EntityDamageByEntityEvent event){
         event.setCancelled(true);
     }
+
+     */
 }

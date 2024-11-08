@@ -2,6 +2,7 @@ package ksu.minecraft.prison.listeners;
 
 import ksu.minecraft.prison.Prison;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -60,7 +61,7 @@ public class EventListener implements Listener {
                         plugin.getMenus().openWarpsMenu(player);
                         break;
                     default:
-                        player.sendMessage("Warp does not exist.");
+                        player.sendMessage("Hello!");
                 }
             }
         }
@@ -75,41 +76,44 @@ public class EventListener implements Listener {
             if (clickedItem != null && clickedItem.hasItemMeta()){
                 String warpName = MiniMessage.miniMessage().serialize(clickedItem.getItemMeta().displayName());
 
-                switch(warpName){
-                    case "Warp to D":
-                        player.closeInventory();
-                        plugin.getServer().dispatchCommand(player, "warp d");
+                int slot = event.getSlot();
+                switch (slot) {
+                    case 1:
+                        player.performCommand("warp D");
                         break;
-                    case "Warp to C":
-                        player.closeInventory();
-                        plugin.getServer().dispatchCommand(player, "warp c");
+                    case 2:
+                        player.performCommand("warp C");
                         break;
-                    case "Warp to B":
-                        player.closeInventory();
-                        plugin.getServer().dispatchCommand(player, "warp b");
+                    case 3:
+                        player.performCommand("warp B");
                         break;
-                    case "Warp to A":
-                        player.closeInventory();
-                        plugin.getServer().dispatchCommand(player, "warp a");
+                    case 4:
+                        player.performCommand("warp A");
                         break;
-                    case "Warp to K":
-                        player.closeInventory();
-                        plugin.getServer().dispatchCommand(player, "warp k");
+                    case 5:
+                        player.performCommand("warp K");
                         break;
-                    case "Warp to S":
-                        player.closeInventory();
-                        plugin.getServer().dispatchCommand(player, "warp s");
+                    case 6:
+                        player.performCommand("warp S");
                         break;
-                    case "Warp to U":
-                        player.closeInventory();
-                        plugin.getServer().dispatchCommand(player, "warp u");
+                    case 7:
+                        player.performCommand("warp U");
                         break;
-                    case "Warp to Cells":
-                        player.closeInventory();
-                        plugin.getServer().dispatchCommand(player, "warp cells");
+                    case 10:
+                        player.performCommand("warp spawn");
+                        break;
+                    case 11:
+                        player.performCommand("warp info");
+                        break;
+                    case 12:
+                        player.performCommand("warp rules");
+                        break;
+                    case 13:
+                        player.performCommand("warp cells");
                         break;
                     default:
-                        player.sendMessage("Sorry, that warp does not exist!");
+                        //player.sendMessage("Sorry, that warp does not exist!");
+                        break;
                 }
             }
         }
@@ -140,8 +144,6 @@ public class EventListener implements Listener {
             }
         }
     }
-
-
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {

@@ -50,4 +50,8 @@ public class EconomyManager {
     public void depositMoney(Player player, double amount) {
         economy.depositPlayer(player, amount);
     }
+
+    public double getBalance(Player player) {
+        return economy.getBalance(player);
+    }
 }

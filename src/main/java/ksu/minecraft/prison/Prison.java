@@ -1,8 +1,9 @@
 package ksu.minecraft.prison;
 
 import ksu.minecraft.prison.commands.CellsCommand;
-import ksu.minecraft.prison.commands.MineResetCommand;
+//import ksu.minecraft.prison.commands.MineResetCommand;
 import ksu.minecraft.prison.commands.MinesCommand;
+import ksu.minecraft.prison.commands.RankUpCommand;
 import ksu.minecraft.prison.commands.RanksCommand;
 import ksu.minecraft.prison.listeners.EventListener;
 import ksu.minecraft.prison.listeners.SellMenuListener;
@@ -30,10 +31,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.Bukkit;
-
+import ksu.minecraft.prison.listeners.FishingListener;
 import java.io.File;
-import java.io.IOException;
-import java.util.Objects;
 
 public final class Prison extends JavaPlugin {
 
@@ -66,37 +65,35 @@ public final class Prison extends JavaPlugin {
         shopVillagerManager = new ShopVillagerManager(this);
         menus = new Menus(this, economyManager);
 
-
-
-
         //check for luckperms to make sure the server has the plugin
         RegisteredServiceProvider<LuckPerms> provider = getServer().getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null) {
             luckPerms = provider.getProvider();
         }
 
-        this.getCommand("minereset").setExecutor(new MineResetCommand(mineManager));
-        this.getCommand("mines").setExecutor(new MinesCommand(this, mineManager));
-        this.getCommand("cells").setExecutor(new CellsCommand(this));
-        this.getCommand("ranks").setExecutor(new RanksCommand(this, rankManager));
-
+        //this.getCommand("minereset").setExecutor(new MineResetCommand(mineManager));
+        this.getCommand("mine").setExecutor(new MinesCommand(this, mineManager));
+        this.getCommand("cells").setExecutor(new CellsCommand(this, economyManager));
+        getCommand("ranks").setExecutor(new RanksCommand(this, rankManager, luckPerms));
+        getCommand("rankup").setExecutor(new RankUpCommand(rankManager));
 
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
         getServer().getPluginManager().registerEvents(new ShopListener(this), this);
         getServer().getPluginManager().registerEvents(new SellMenuListener(this, economyManager), this);
-
+        getServer().getPluginManager().registerEvents(new FishingListener(), this);
 
         this.world = Bukkit.getWorld("world");
         spawnVillagers();
 
 
         //Mine timer
-        getServer().getScheduler().runTaskTimer(this, () -> mineManager.monitorMines(), 0L, 20L * 60); // Every minute
+        getServer().getScheduler().runTaskTimer(this, () -> mineManager.monitorMines(), 6000L, 6000L); // Every minute
     }
 
     @Override
     public void onDisable() {
         getLogger().info("Prison plugin has been disabled!");
+        mineManager.saveMinesConfig();
     }
 
     public Menus getMenus() {
@@ -196,7 +193,7 @@ public final class Prison extends JavaPlugin {
     private void goKSU(Player player){
         MiniMessage mm = MiniMessage.miniMessage();
 
-        Component ksuMessage = mm.deserialize("<hover:show_text: Check out the CCSE website, that's where we're from!><yellow>G<green>o <yellow>K<green>S<yellow>U<green>!");
+        Component ksuMessage = mm.deserialize("<hover:show_text:Check out the CCSE website, that's where we're from!><yellow>G<green>o <yellow>K<green>S<yellow>U<green>!");
 
         player.sendMessage(ksuMessage);
     }
@@ -222,4 +219,5 @@ public final class Prison extends JavaPlugin {
     public NamespacedKey getNamespacedKey(String key) {
         return new NamespacedKey(this, key);
     }
+
 }

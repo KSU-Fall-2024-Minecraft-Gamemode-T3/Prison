@@ -18,16 +18,17 @@ commands:
   cells:
     description: View and rent cells
     usage: /cells
-  mines:
+  mine:
     description: Admin-only command to access the mines
-    usage: /mines
+    usage: /mine
     permission: prison.admin
     permission-message: You do not have permission to use this command.
-  minereset:
-    description: Resets the specified mine
-    usage: /minereset <minename>
-    permission: prison.admin
-    permission-message: You do not have permission to use this command.
+#  minereset:
+#    description: Resets the specified mine
+#    usage: /minereset <minename>
+#    permission: prison.admin
+#    permission-message: You do not have permission to use this command.
+softdepend: [LuckPerms]
 
 permissions:
   prison.use:

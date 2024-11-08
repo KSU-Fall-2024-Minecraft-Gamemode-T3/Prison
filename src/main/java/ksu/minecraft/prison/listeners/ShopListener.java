@@ -10,11 +10,6 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 public class ShopListener implements Listener {
-    /*
-   ------------------------------------
-          Shop Villager Listeners
-   ------------------------------------
-    */
 
     private final Prison plugin;
 
@@ -23,7 +18,7 @@ public class ShopListener implements Listener {
     }
 
     @EventHandler
-    //TEST attempt at changing PlayerInteractAtEntityEvent to PlayerInteractEntityEvent
+
     public void onPlayerInteract(PlayerInteractAtEntityEvent event){
         Player player = event.getPlayer();
         //Check to see if the entity clicked has the shop key i.e. a villager. Could be a point of issue if the data types aren't right for some reason
@@ -39,7 +34,7 @@ public class ShopListener implements Listener {
         }else{
             //This is an error message that should let you know if something is wrong with how
             //the villager is not assigned the 'is_shop' tag for some reason, shouldn't happen.
-            player.sendMessage(Component.text("Entity is not recognized as 'is_shop'"));
+            //player.sendMessage(Component.text("Entity is not recognized as 'is_shop'"));
         }
     }
 

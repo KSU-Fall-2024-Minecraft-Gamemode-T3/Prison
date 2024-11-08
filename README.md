@@ -10,7 +10,7 @@ This Prison gameplay mode features old school Prison features and\ where there i
 
 **Ranks:** A member can see the ranks, their progression and the costs for the new ranks, money can be spent to gain a higher rank.
 
-**Integration With LuckPerms :** This manages the player ranks. It mainly deals with the rank-ups granting new mines.
+**Integration With LuckPerms:** This manages the player ranks. It mainly deals with the rank-ups granting new mines.
 
 **Integration With Vault Economy:** This manages in-game money for rank-ups and shops.
 
@@ -50,17 +50,19 @@ Reloads this plugin and configuration files.
 
 Lists the current mines that are listed in the mines.yml
 
->/minereset <minename>
+>/mine reset <minename>
 
-Refills the mine defined
+Refills a specified mine, the name of the mine must be in the mines.yml file
 
 >/warp <location>
 
-Teleports the user to a specified mine or the cell area
+Teleports the user to a specified mine or to the cells area
 
 ### Configuration
 
 The ranking system and its corresponding specification as to how much they will cost for each rank available to players have been implemented in the config.yml under the ranks list. The prices of the items they collect and sell are also values that can be changed in the config.yml file as well as the price of rent a prison cell and how long you can rent it.
+
+The permissions for admins are set in the plugin.yml file as well as defining each of the commands specific to this plug-in such as /prison.
 
 Example: 
 ```
@@ -128,29 +130,35 @@ sellable-items:
 
 **RankManager.java:** Management of ranks and the process of raising a player's rank to the next level.
 
+**Mine.java:** Class that handles the logic of all the commands of the /mines command with multiple constructors for each command. Includes the logic to teleport players to a safe spot when resetting a mine.
+
 **MineManager.java:** Contains the methods of listing the available mines in-game. Contains the method to restore a specified mine using worldguard and FAWE.
 
 **ShopVillagerManager.java:** Creates the shop villagers players sell their items at specified locations across the map.
 
 -- **Listeners** --
 
-**EventListener.java:** This element is responsible for handling events like clicking items in an inventory, a player joining, the dropping of their items, and others.
+**EventListener.java:** This class is responsible for handling events caused by the Player such as clicking items in an inventory, a player joining, the dropping of their items, and others.
+
+**FishingListener.java:** This class tracks if a player is fishing and will change any caught item into a raw cod.
 
 **SellMenuListener.java:** The class that manages the shop menu created by interacting with a shop villager. Implements several checks to make sure the player is not able to move around important items in both their menu and the shop. This is to protect the player from accidentally losing their items.
 
 **SellMenuHolder.java:** An abstract class that defines an InventoryHolder for the sell menu proper.
 
-**ShopListener.java:** A class that allows the player to interact with a shop villager and open their shop menu. It also contains the method that makes the shop villagers invincible.
+**ShopListener.java:** A class that allows the player to interact with a shop villager and open their shop menu.  It also contains the method that makes the shop villagers invincible.
 
 --**Commands**--
 
 **CellsComand.java:** The class that allows a player to rent out a specified prison cell. Requires the specific cell number to funciton and reads from the config.yml file for pricing and rent time.
 
-**MineResetCommand.java:** Class that restores a specified mine back to being full. Reads from the mines.yml file to fill in the right materials for the specified mine.
-
-**MinesCommand.java:** A simple class that reads through the mines.yml file to print out a full list of the available mines in the Prison. 
+**MinesCommand.java:** |Administrator Only| A class that lists out a number of options an administrator can use for mines. The options include listing out the current mines, reset a mine back to full, reload the mines.yml file, make a new mine, or set a mine's position coordinates on your current position
 
 **RanksCommand.java:** A class that will read the config.yml file for the available ranks and their current prices. The listed prices will reflect the prices in the config file.
+
+**RankUpCommand.java:** Small class that will activate the rankup command on the player before returning.
+
+**SellAllCommand.java:** Depreciated class that would sell all of the player's inventory that can be sold in the shop menu. Not in use anymore
 
 **SellCommand.java:** Depreciated class that used to open the shop menu on player command, not currently in use anymore.
 

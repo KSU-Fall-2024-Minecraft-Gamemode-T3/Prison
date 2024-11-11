@@ -22,12 +22,22 @@ public class RankManager {
         this.luckPerms = luckPerms;
     }
 
+    /**
+     * Retrieves the player's current rank.
+     * If the rank is 'default', it will be displayed as 'D'.
+     */
     public String getCurrentRank(Player player) {
         User user = luckPerms.getUserManager().getUser(player.getUniqueId());
-        return user != null ? user.getPrimaryGroup() : null;
+        if (user != null) {
+            // Treat 'default' as 'D' and return the rank in uppercase
+            return user.getPrimaryGroup().equalsIgnoreCase("default") ? "D" : user.getPrimaryGroup().toUpperCase();
+        }
+        return null;
     }
 
-
+    /**
+     * Handles the player's rank-up process.
+     */
     public void rankUp(Player player) {
         User user = luckPerms.getUserManager().getUser(player.getUniqueId());
         if (user == null) {
@@ -35,16 +45,16 @@ public class RankManager {
             return;
         }
 
+        // Get the player's current rank
         String currentRankName = user.getPrimaryGroup();
-        player.sendMessage(ChatColor.YELLOW + "Your current rank is: " + currentRankName);
 
-        // Handle the 'default' rank
+        // Display 'D' instead of 'default' in messages, and convert all to uppercase
+        String displayRank = currentRankName.equalsIgnoreCase("default") ? "D" : currentRankName.toUpperCase();
+        player.sendMessage(ChatColor.YELLOW + "Your current rank is: " + displayRank);
+
+        // Handle the 'default' rank as starting rank
         if (currentRankName.equalsIgnoreCase("default")) {
-            // Assign the player to the starting rank
-            currentRankName = "D";
-            user.setPrimaryGroup("D");
-            luckPerms.getUserManager().saveUser(user);
-            player.sendMessage(ChatColor.GREEN + "You have been assigned to rank D.");
+            currentRankName = "default";
         }
 
         // Get the 'ranks' track from LuckPerms
@@ -68,14 +78,15 @@ public class RankManager {
             return;
         }
 
-        player.sendMessage(ChatColor.YELLOW + "Next rank is: " + nextRankName);
+        // Convert the next rank name to uppercase for display
+        player.sendMessage(ChatColor.YELLOW + "Next rank is: " + nextRankName.toUpperCase());
 
         // Fetch the price for the next rank from the config
         FileConfiguration config = plugin.getConfig();
         int price = config.getInt("ranks." + nextRankName.toUpperCase() + ".price", -1);
 
         if (price == -1) {
-            player.sendMessage(ChatColor.RED + "Price for rank " + nextRankName + " is not set in the config!");
+            player.sendMessage(ChatColor.RED + "Price for rank " + nextRankName.toUpperCase() + " is not set in the config!");
             return;
         }
 
@@ -92,10 +103,10 @@ public class RankManager {
 
             if (result.wasSuccessful()) {
                 luckPerms.getUserManager().saveUser(user);
-                player.sendMessage(ChatColor.GREEN + "You ranked up to " + nextRankName + "!");
-                Bukkit.broadcastMessage(ChatColor.GOLD + player.getName() + " has ranked up to " + nextRankName + "!");
+                player.sendMessage(ChatColor.GREEN + "You ranked up to " + nextRankName.toUpperCase() + "!");
+                Bukkit.broadcastMessage(ChatColor.GOLD + player.getName() + " has ranked up to " + nextRankName.toUpperCase() + "!");
             } else {
-                player.sendMessage(ChatColor.RED + "Could not promote you to " + nextRankName + "!");
+                player.sendMessage(ChatColor.RED + "Could not promote you to " + nextRankName.toUpperCase() + "!");
             }
         } else {
             player.sendMessage(ChatColor.RED + "You need $" + price + " to rank up!");

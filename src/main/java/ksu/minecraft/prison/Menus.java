@@ -3,7 +3,6 @@ package ksu.minecraft.prison;
 import ksu.minecraft.prison.listeners.SellMenuHolder;
 import ksu.minecraft.prison.managers.EconomyManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -16,17 +15,11 @@ import org.bukkit.inventory.meta.SkullMeta;
 import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.Arrays;
 import net.kyori.adventure.text.format.TextDecoration;
-import java.text.DecimalFormat;
-import java.util.stream.Collectors;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.inventory.meta.ItemMeta;
-import net.kyori.adventure.text.Component;
 
 import java.text.DecimalFormat;
-import java.util.Collections;
-import java.util.Arrays;
 import java.util.stream.Collectors;
+
+import java.util.Collections;
 
 public class Menus {
 
@@ -91,11 +84,31 @@ public class Menus {
         pickaxe.setItemMeta(pickaxeMeta);
         prisonMenu.setItem(11, pickaxe);
 
+
+        ItemStack rules = new ItemStack(Material.IRON_SWORD);
+        ItemMeta rulesMeta = rules.getItemMeta();
+        rulesMeta.displayName(Component.text("Rules"));
+        rules.setItemMeta(rulesMeta);
+        prisonMenu.setItem(8, rules);
+
+        ItemStack rankup = new ItemStack(Material.GOLD_INGOT);
+        ItemMeta rankupMeta = rankup.getItemMeta();
+        rankupMeta.displayName(Component.text("RankUp"));
+        rankup.setItemMeta(rankupMeta);
+        prisonMenu.setItem(0, rankup);
+
         ItemStack chest = new ItemStack(Material.CHEST);
         ItemMeta chestMeta = chest.getItemMeta();
         chestMeta.displayName(Component.text("Warps"));
         chest.setItemMeta(chestMeta);
         prisonMenu.setItem(15, chest);
+
+        // Ranks item
+        ItemStack ranksItem = new ItemStack(Material.EMERALD);
+        ItemMeta ranksMeta = ranksItem.getItemMeta();
+        ranksMeta.displayName(Component.text("Ranks"));
+        ranksItem.setItemMeta(ranksMeta);
+        prisonMenu.setItem(18, ranksItem);
 
         player.openInventory(prisonMenu);
     }

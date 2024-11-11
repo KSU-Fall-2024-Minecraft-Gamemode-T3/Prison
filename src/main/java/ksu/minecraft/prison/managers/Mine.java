@@ -18,41 +18,39 @@ public class Mine {
     private final int maxX, maxY, maxZ;
     private final boolean fillMode;
     private final String surface;
-    private final int resetDelay;
-    private int resetClock;
-    private final List<Integer> resetWarnings = new ArrayList<>();
     private final boolean isSilent;
     private final Map<Material, Double> composition = new HashMap<>();
     private final Random random = new Random();
+    private final double resetPercentage; // Percentage at which the mine resets
+
+    private int totalBlocks;
+    private int blocksMined;
 
     // Constructor for loading mine from configuration
     public Mine(String name, ConfigurationSection config) {
         this.name = config.getString("name", name);
         this.world = Bukkit.getWorld(config.getString("world"));
-        this.minX = config.getInt("minX");
-        this.minY = config.getInt("minY");
-        this.minZ = config.getInt("minZ");
-        this.maxX = config.getInt("maxX");
-        this.maxY = config.getInt("maxY");
-        this.maxZ = config.getInt("maxZ");
+
+        // Ensure min and max coordinates are properly assigned
+        int tempMinX = config.getInt("minX");
+        int tempMaxX = config.getInt("maxX");
+        this.minX = Math.min(tempMinX, tempMaxX);
+        this.maxX = Math.max(tempMinX, tempMaxX);
+
+        int tempMinY = config.getInt("minY");
+        int tempMaxY = config.getInt("maxY");
+        this.minY = Math.min(tempMinY, tempMaxY);
+        this.maxY = Math.max(tempMinY, tempMaxY);
+
+        int tempMinZ = config.getInt("minZ");
+        int tempMaxZ = config.getInt("maxZ");
+        this.minZ = Math.min(tempMinZ, tempMaxZ);
+        this.maxZ = Math.max(tempMinZ, tempMaxZ);
+
         this.fillMode = config.getBoolean("fillMode", false);
         this.surface = config.getString("surface", "");
-        this.resetDelay = config.getInt("resetDelay", 0);
-        this.resetClock = config.getInt("resetClock", resetDelay);
         this.isSilent = config.getBoolean("isSilent", false);
-
-        // Load reset warnings
-        List<?> warningsList = config.getList("resetWarnings", Collections.emptyList());
-        for (Object obj : warningsList) {
-            if (obj instanceof Integer) {
-                resetWarnings.add((Integer) obj);
-            } else if (obj instanceof String) {
-                try {
-                    resetWarnings.add(Integer.parseInt((String) obj));
-                } catch (NumberFormatException ignored) {
-                }
-            }
-        }
+        this.resetPercentage = config.getDouble("resetPercentage", 35.0); // Default to 35%
 
         // Load composition
         if (config.contains("composition")) {
@@ -68,12 +66,19 @@ public class Mine {
             // Default to STONE if no composition is specified
             composition.put(Material.STONE, 1.0);
         }
+
+        // Initialize blocksMined from config
+        this.blocksMined = config.getInt("blocksMined", 0);
+        //Bukkit.getLogger().info("Mine '" + name + "' blocksMined initialized to: " + blocksMined);
+
+        // Initialize totalBlocks
+        initializeTotalBlocks();
     }
 
     // Constructor for creating a new mine via commands
     public Mine(String name, World world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ,
-                boolean fillMode, String surface, int resetDelay, List<Integer> resetWarnings, boolean isSilent,
-                Map<Material, Double> composition) {
+                boolean fillMode, String surface, boolean isSilent,
+                Map<Material, Double> composition, double resetPercentage) {
         this.name = name;
         this.world = world;
         this.minX = Math.min(minX, maxX);
@@ -84,11 +89,21 @@ public class Mine {
         this.maxZ = Math.max(minZ, maxZ);
         this.fillMode = fillMode;
         this.surface = surface;
-        this.resetDelay = resetDelay;
-        this.resetClock = resetDelay;
         this.isSilent = isSilent;
-        this.resetWarnings.addAll(resetWarnings);
         this.composition.putAll(composition);
+        this.resetPercentage = resetPercentage;
+
+        // Initialize blocksMined
+        this.blocksMined = 0;
+        //Bukkit.getLogger().info("Mine '" + name + "' blocksMined initialized to: " + blocksMined);
+
+        // Initialize totalBlocks
+        initializeTotalBlocks();
+    }
+
+    public void initializeTotalBlocks() {
+        totalBlocks = (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
+        //Bukkit.getLogger().info("Mine '" + name + "' totalBlocks initialized to: " + totalBlocks);
     }
 
     public String getName() {
@@ -99,11 +114,13 @@ public class Mine {
         return isSilent;
     }
 
-
-     //Checks if a player's location is inside the mine.
-
+    // Checks if a player's location is inside the mine.
     public boolean isPlayerInside(Player player) {
-        Location loc = player.getLocation();
+        return containsLocation(player.getLocation());
+    }
+
+    // Checks if a location is inside the mine.
+    public boolean containsLocation(Location loc) {
         if (!loc.getWorld().equals(world)) {
             return false;
         }
@@ -111,14 +128,20 @@ public class Mine {
         int y = loc.getBlockY();
         int z = loc.getBlockZ();
 
-        return x >= minX && x <= maxX
-                && y >= minY && y <= maxY
-                && z >= minZ && z <= maxZ;
+        boolean withinX = x >= minX && x <= maxX;
+        boolean withinY = y >= minY && y <= maxY;
+        boolean withinZ = z >= minZ && z <= maxZ;
+
+        boolean contains = withinX && withinY && withinZ;
+
+        /*if (contains) {
+            Bukkit.getLogger().info("Location " + loc + " is within mine '" + name + "'");
+        }*/
+
+        return contains;
     }
 
-
-     // Teleports a player to the top of the mine.
-
+    // Teleports a player to the top of the mine.
     public void teleportPlayerToTop(Player player) {
         Location teleportLocation = new Location(world,
                 (minX + maxX) / 2.0,
@@ -127,9 +150,7 @@ public class Mine {
         player.teleport(teleportLocation);
     }
 
-
-     //Resets the mine area based on its composition.
-
+    // Resets the mine area based on its composition.
     public void reset() {
         if (world == null) {
             Bukkit.getLogger().warning("World not found for mine: " + name);
@@ -147,7 +168,7 @@ public class Mine {
         // Prepare materials and their probabilities
         double totalPercentage = composition.values().stream().mapToDouble(Double::doubleValue).sum();
         if (totalPercentage <= 0) {
-            Bukkit.getLogger().warning("Invalid composition for mine: " + name);
+            //Bukkit.getLogger().warning("Invalid composition for mine: " + name);
             return;
         }
 
@@ -190,8 +211,14 @@ public class Mine {
                 }
             }
         }
-    }
 
+        // Reset blocksMined
+        resetBlocksMined();
+        Bukkit.getLogger().info("Mine '" + name + "' blocksMined reset to: " + blocksMined);
+
+        // Announce reset
+        Bukkit.broadcastMessage(ChatColor.GREEN + "[Mines] " + name + " has been reset!");
+    }
 
     private Material getRandomMaterial(List<Map.Entry<Material, Double>> materialChances) {
         double r = random.nextDouble();
@@ -204,23 +231,14 @@ public class Mine {
         return Material.STONE;
     }
 
+    public double getCurrentResourcePercentage() {
+        double percentage = ((double) (totalBlocks - blocksMined) / totalBlocks) * 100.0;
+        Bukkit.getLogger().info("Mine '" + name + "' resource percentage: " + percentage + "%");
+        return percentage;
+    }
 
-    public boolean shouldReset() {
-        if (resetDelay <= 0) {
-            return false;
-        }
-        resetClock--;
-        if (resetClock <= 0) {
-            resetClock = resetDelay;
-            return true;
-        }
-
-        // Send warnings if needed
-        if (!isSilent && resetWarnings.contains(resetClock)) {
-            Bukkit.broadcastMessage(ChatColor.YELLOW + "Mine " + name + " will reset in " + resetClock + " minutes!");
-        }
-
-        return false;
+    public double getResetPercentage() {
+        return resetPercentage;
     }
 
     public void saveToConfig(ConfigurationSection mineSection) {
@@ -234,15 +252,37 @@ public class Mine {
         mineSection.set("maxZ", maxZ);
         mineSection.set("fillMode", fillMode);
         mineSection.set("surface", surface);
-        mineSection.set("resetDelay", resetDelay);
-        mineSection.set("resetClock", resetClock);
-        mineSection.set("resetWarnings", resetWarnings);
         mineSection.set("isSilent", isSilent);
+        mineSection.set("resetPercentage", resetPercentage);
 
         // Save composition
         ConfigurationSection compSection = mineSection.createSection("composition");
         for (Map.Entry<Material, Double> entry : composition.entrySet()) {
             compSection.set(entry.getKey().name(), entry.getValue());
         }
+
+        // Save blocksMined
+        mineSection.set("blocksMined", blocksMined);
+    }
+
+    // Event-based methods
+    public void incrementBlocksMined() {
+        blocksMined++;
+        //Bukkit.getLogger().info("Mine '" + name + "' blocksMined incremented to: " + blocksMined);
+    }
+
+    public void decrementBlocksMined() {
+        if (blocksMined > 0) {
+            blocksMined--;
+            //Bukkit.getLogger().info("Mine '" + name + "' blocksMined decremented to: " + blocksMined);
+        }
+    }
+
+    public void resetBlocksMined() {
+        blocksMined = 0;
+    }
+
+    public int getBlocksMined() {
+        return blocksMined;
     }
 }

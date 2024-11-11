@@ -59,7 +59,7 @@ public class MinesCommand implements CommandExecutor {
                 player.sendMessage(ChatColor.GREEN + "Mines configuration reloaded.");
             } else if (args[0].equalsIgnoreCase("create")) {
                 // Create a new mine
-                // Usage: /mine create <mineName>
+                // Usage: /mine create <mineName> [resetPercentage]
                 if (args.length >= 2) {
                     String mineName = args[1];
 
@@ -81,6 +81,16 @@ public class MinesCommand implements CommandExecutor {
                     Map<Material, Double> composition = new HashMap<>();
                     composition.put(Material.STONE, 1.0);
 
+                    // Parse resetPercentage if provided
+                    double resetPercentage = 35.0; // Default to 35%
+                    if (args.length >= 3) {
+                        try {
+                            resetPercentage = Double.parseDouble(args[2]);
+                        } catch (NumberFormatException e) {
+                            player.sendMessage(ChatColor.RED + "Invalid reset percentage. Using default 35%.");
+                        }
+                    }
+
                     // Create the new mine
                     Mine newMine = new Mine(
                             mineName,
@@ -89,20 +99,19 @@ public class MinesCommand implements CommandExecutor {
                             pos2.getBlockX(), pos2.getBlockY(), pos2.getBlockZ(),
                             false, // fillMode
                             "",    // surface
-                            0,     // resetDelay
-                            Collections.emptyList(), // resetWarnings
                             false, // isSilent
-                            composition
+                            composition,
+                            resetPercentage
                     );
 
                     mineManager.addMine(newMine);
-                    player.sendMessage(ChatColor.GREEN + "Mine '" + mineName + "' has been created.");
+                    player.sendMessage(ChatColor.GREEN + "Mine '" + mineName + "' has been created with reset percentage: " + resetPercentage + "%.");
 
                     // Clear the positions
                     pos1Map.remove(playerUUID);
                     pos2Map.remove(playerUUID);
                 } else {
-                    player.sendMessage(ChatColor.RED + "Usage: /mine create <mineName>");
+                    player.sendMessage(ChatColor.RED + "Usage: /mine create <mineName> [resetPercentage]");
                 }
             } else if (args[0].equalsIgnoreCase("pos1")) {
                 // Set position 1
@@ -132,7 +141,7 @@ public class MinesCommand implements CommandExecutor {
         player.sendMessage(ChatColor.GREEN + "/mine list" + ChatColor.WHITE + " - List all mines");
         player.sendMessage(ChatColor.GREEN + "/mine reset <mineName>" + ChatColor.WHITE + " - Reset a mine");
         player.sendMessage(ChatColor.GREEN + "/mine reload" + ChatColor.WHITE + " - Reload mines configuration");
-        player.sendMessage(ChatColor.GREEN + "/mine create <mineName>" + ChatColor.WHITE + " - Create a new mine");
+        player.sendMessage(ChatColor.GREEN + "/mine create <mineName> [resetPercentage]" + ChatColor.WHITE + " - Create a new mine");
         player.sendMessage(ChatColor.GREEN + "/mine pos1" + ChatColor.WHITE + " - Set position 1");
         player.sendMessage(ChatColor.GREEN + "/mine pos2" + ChatColor.WHITE + " - Set position 2");
     }

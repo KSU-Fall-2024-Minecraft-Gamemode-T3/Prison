@@ -15,14 +15,13 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import net.luckperms.api.model.user.User;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+
+
 
 
 public class EventListener implements Listener {
-    /*
-    ---------------------------------------
-            Common Player Listeners
-    ---------------------------------------
-     */
 
 
     private final Prison plugin;
@@ -59,6 +58,22 @@ public class EventListener implements Listener {
                         break;
                     case "Warps":
                         plugin.getMenus().openWarpsMenu(player);
+                        break;
+                    case "Rules": // Handle the Iron Sword for /rules command
+                        player.closeInventory();
+                        plugin.getServer().dispatchCommand(player, "rules");
+                        break;
+                    case "Ranks":
+                        player.closeInventory();
+                        plugin.getServer().dispatchCommand(player, "ranks");
+                        break;
+                    case "Cells":
+                        player.closeInventory();
+                        plugin.getServer().dispatchCommand(player, "cells check");
+                        break;
+                    case "RankUp":
+                        player.closeInventory();
+                        plugin.getServer().dispatchCommand(player, "rankup");
                         break;
                     default:
                         player.sendMessage("Hello!");
@@ -177,5 +192,31 @@ public class EventListener implements Listener {
         }
         return null;
     }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        // Prevent dropping the Prison Menu compass on death
+        event.getDrops().removeIf(item ->
+                item != null &&
+                        item.getType() == Material.COMPASS &&
+                        item.getItemMeta() != null &&
+                        item.getItemMeta().displayName().equals(Component.text("Prison Menu"))
+        );
+    }
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+
+        // Check if the player already has the compass, to avoid duplicates
+        boolean hasCompass = player.getInventory().contains(Material.COMPASS);
+
+        if (!hasCompass) {
+            // Give the player the Prison Menu compass if they don't already have it
+            ItemStack compass = new ItemStack(Material.COMPASS);
+            compass.editMeta(meta -> meta.displayName(Component.text("Prison Menu")));
+            player.getInventory().setItem(8, compass); // Last hotbar slot
+        }
+    }
+
 
 }

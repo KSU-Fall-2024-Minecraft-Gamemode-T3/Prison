@@ -28,15 +28,19 @@ cells:
   d:
     price: 1000       # Price for D cells
     duration: 7       # Duration in days for renting D cells
+    range: 1-52
   c:
     price: 1500       # Price for C cells
     duration: 7       # Duration in days for renting C cells
+    range: 1-40
   b:
     price: 2500       # Price for B cells
     duration: 7       # Duration in days for renting B cells
+    range: 1-32
   a:
     price: 4000       # Price for A cells
     duration: 7       # Duration in days for renting A cells
+    range: 1-28
 
 #ITEMS AND PRICING
 sellable-items:

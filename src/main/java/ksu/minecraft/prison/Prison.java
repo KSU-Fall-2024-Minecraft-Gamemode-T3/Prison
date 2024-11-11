@@ -1,13 +1,8 @@
 package ksu.minecraft.prison;
 
-import ksu.minecraft.prison.commands.CellsCommand;
+import ksu.minecraft.prison.commands.*;
 //import ksu.minecraft.prison.commands.MineResetCommand;
-import ksu.minecraft.prison.commands.MinesCommand;
-import ksu.minecraft.prison.commands.RankUpCommand;
-import ksu.minecraft.prison.commands.RanksCommand;
-import ksu.minecraft.prison.listeners.EventListener;
-import ksu.minecraft.prison.listeners.SellMenuListener;
-import ksu.minecraft.prison.listeners.ShopListener;
+import ksu.minecraft.prison.listeners.*;
 import ksu.minecraft.prison.managers.EconomyManager;
 import ksu.minecraft.prison.managers.MineManager;
 import ksu.minecraft.prison.managers.RankManager;
@@ -18,6 +13,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -31,8 +28,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.Bukkit;
-import ksu.minecraft.prison.listeners.FishingListener;
+
 import java.io.File;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.UUID;
 
 public final class Prison extends JavaPlugin {
 
@@ -47,6 +47,9 @@ public final class Prison extends JavaPlugin {
     private FileConfiguration config;
     private Menus menus;
     public static World world;
+    private File cellsFile;
+    private FileConfiguration cellsConfig;
+    private MinesListener minesListener;
 
     @Override
     public void onEnable() {
@@ -73,7 +76,7 @@ public final class Prison extends JavaPlugin {
 
         //this.getCommand("minereset").setExecutor(new MineResetCommand(mineManager));
         this.getCommand("mine").setExecutor(new MinesCommand(this, mineManager));
-        this.getCommand("cells").setExecutor(new CellsCommand(this, economyManager));
+        this.getCommand("cells").setExecutor(new CellsCommand(this, economyManager,null));
         getCommand("ranks").setExecutor(new RanksCommand(this, rankManager, luckPerms));
         getCommand("rankup").setExecutor(new RankUpCommand(rankManager));
 
@@ -85,9 +88,52 @@ public final class Prison extends JavaPlugin {
         this.world = Bukkit.getWorld("world");
         spawnVillagers();
 
+        getCommand("prison").setTabCompleter(new PrisonTabCompleter(this, mineManager));
+        getCommand("mine").setTabCompleter(new PrisonTabCompleter(this, mineManager));
+        getCommand("ranks").setTabCompleter(new PrisonTabCompleter(this, mineManager));
+        getCommand("rankup").setTabCompleter(new PrisonTabCompleter(this, mineManager));
+        getCommand("cells").setTabCompleter(new PrisonTabCompleter(this, mineManager));
 
-        //Mine timer
-        getServer().getScheduler().runTaskTimer(this, () -> mineManager.monitorMines(), 6000L, 6000L); // Every minute
+
+        loadCellsConfig();
+
+        // Initialize CellsListener without CellsCommand reference
+        CellsListener cellsListener = new CellsListener(this, economyManager);
+
+        // Initialize CellsCommand with CellsListener
+        CellsCommand cellsCommand = new CellsCommand(this, economyManager, cellsListener);
+
+        // Set the CellsCommand reference in CellsListener
+        cellsListener.setCellsCommand(cellsCommand);
+
+        getCommand("cells").setExecutor(cellsCommand);
+        getServer().getPluginManager().registerEvents(cellsListener, this);
+
+        // Reschedule cell expirations on startup
+        rescheduleCellExpirations(cellsCommand); // broke
+        cellsCommand.scheduleSignUpdates();
+
+        // Initialize MineManager
+        mineManager = new MineManager(this);
+
+        // Initialize MinesListener
+        minesListener = new MinesListener(this, mineManager); // Add this line
+
+        // Register commands
+        getCommand("mine").setExecutor(new MinesCommand(this, mineManager));
+
+        // Register event listeners
+        getServer().getPluginManager().registerEvents(minesListener, this); // Use minesListener
+        getServer().getPluginManager().registerEvents(new MineBlockListener(mineManager), this);
+
+        // Schedule tasks
+        getServer().getScheduler().runTaskTimer(this, () -> {
+            mineManager.monitorMines();
+            minesListener.updateAllMineSigns(); // Use the stored instance
+        }, 0L, 120L); // Every minute
+
+        //getServer().getPluginManager().registerEvents(new MineBlockListener(mineManager), this);
+
     }
 
     @Override
@@ -159,18 +205,24 @@ public final class Prison extends JavaPlugin {
     private void sendHelpMenu(Player player) {
         MiniMessage mm = MiniMessage.miniMessage();
 
-        Component helpMessage = mm.deserialize("""
-            <green><bold>Prison Plugin Help:</bold></green>
-            <hover:show_text:'<yellow>Open the main prison menu'><click:run_command:/prison>/prison</click></hover> - Main prison menu
-            <hover:show_text:'<yellow>View available ranks and costs'><click:run_command:/ranks>/ranks</click></hover> - Show rank progression and costs
-            <hover:show_text:'<yellow>Rank up if you can afford it'><click:run_command:/rankup>/rankup</click></hover> - Rank up
-            <hover:show_text:'<yellow>View and rent a cell'><click:run_command:/cells>/cells</click></hover> - Rent a cell in the prison
-            <hover:show_text:'<yellow>List and manage available mines (admin only)'><click:run_command:/mines>/mines</click></hover> - Manage mines
-            <hover:show_text:'<yellow>Manually reset a specific mine (admin only)'><click:run_command:/minereset <minename>>/minereset <minename></click></hover> - Reset specific mine
-        """);
+        Component helpMessage = mm.deserialize(
+                "<green><bold>Prison Plugin Help:</bold></green>\n" +
+                        "<hover:show_text:'<yellow>Open the main prison menu'><click:run_command:/prison>/prison</click></hover> - Main prison menu\n" +
+                        "<hover:show_text:'<yellow>View available ranks and their costs'><click:run_command:/ranks>/ranks</click></hover> - Shows rank progression and prices\n" +
+                        "<hover:show_text:'<yellow>Rank up if you can afford it'><click:run_command:/rankup>/rankup</click></hover> - Rank up to the next rank\n" +
+                        "<hover:show_text:'<yellow>View and rent a prison cell'><click:run_command:/cells>/cells</click></hover> - Rent a cell in the prison\n" +
+                        "<hover:show_text:'<yellow>List and manage available mines (Admin only)'><click:run_command:/mine>/mine</click></hover> - Manage mines\n" +
+                        "<hover:show_text:'<yellow>Manually reset a specific mine (Admin only)'><click:suggest_command:/mine reset >Reset mine</click></hover> - Reset a specific mine"
+        );
 
+        player.sendMessage(Component.text("\n")); // Add an empty line before the title
         player.sendMessage(helpMessage);
     }
+
+
+
+
+
 
     private void spawnVillagers(){
         //This for loop will attempt to remove all the shop villagers before populating the world with them
@@ -205,12 +257,7 @@ public final class Prison extends JavaPlugin {
     }
 
     private void openPrisonMenu(Player player) {
-        //With the compass item implemented, this method will open that instead
-        /*
-        Inventory prisonMenu = Bukkit.createInventory(null, 27, Component.text("Prison Menu"));
-        // Populate the prison menu with items (example items here)
-        player.openInventory(prisonMenu);
-         */
+
 
         //opens compass prison menu for player
         this.getMenus().openPrisonMenu(player);
@@ -218,6 +265,58 @@ public final class Prison extends JavaPlugin {
 
     public NamespacedKey getNamespacedKey(String key) {
         return new NamespacedKey(this, key);
+    }
+
+    private void rescheduleCellExpirations(CellsCommand cellsCommand) {
+        FileConfiguration cellsConfig = getCellsConfig();
+        ConfigurationSection playerRentals = cellsConfig.getConfigurationSection("playerRentals");
+        if (playerRentals == null) return;
+
+        for (String uuidStr : playerRentals.getKeys(false)) {
+            UUID playerUUID = UUID.fromString(uuidStr);
+            String cell = cellsConfig.getString("playerRentals." + uuidStr + ".cell");
+            long expiresAt = cellsConfig.getLong("playerRentals." + uuidStr + ".expiresAt");
+
+            if (cell != null && expiresAt > Instant.now().getEpochSecond()) {
+                cellsCommand.scheduleCellExpiration(playerUUID, cell, expiresAt);
+            }
+        }
+    }
+
+
+    public void loadCellsConfig() {
+        cellsFile = new File(getDataFolder(), "cells.yml");
+        if (!cellsFile.exists()) {
+            cellsFile.getParentFile().mkdirs();
+            try {
+                // Create a new empty cells.yml file
+                cellsFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        cellsConfig = new YamlConfiguration();
+        try {
+            cellsConfig.load(cellsFile);
+        } catch (IOException | InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public FileConfiguration getCellsConfig() {
+        if (cellsConfig == null) {
+            loadCellsConfig();
+        }
+        return cellsConfig;
+    }
+
+    public void saveCellsConfig() {
+        try {
+            cellsConfig.save(cellsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

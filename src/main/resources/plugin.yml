@@ -37,4 +37,20 @@ permissions:
   prison.admin:
     description: Allows a player to use admin commands for the plugin.
     default: op
+  prison.cells:
+    description: Allows access to cells commands
+    default: true
+    prison.cells.rent:
+      description: Allows renting cells
+      default: true
+    prison.cells.createsign:
+      description: Allows creating rent signs for cells
+      default: op
+    prison.cells.remove:
+      description: Allows admins to remove player cell rentals
+      default: op
+    prison.mines.createsign:
+      description: Allows creating mine signs
+      default: op
+
 permission-message: You do not have permission to execute this command.

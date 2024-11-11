@@ -3,10 +3,11 @@ package ksu.minecraft.prison.commands;
 import ksu.minecraft.prison.Prison;
 import ksu.minecraft.prison.managers.RankManager;
 import net.luckperms.api.LuckPerms;
-import net.luckperms.api.model.group.Group;
 import net.luckperms.api.track.Track;
 import org.bukkit.ChatColor;
-import org.bukkit.command.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
@@ -27,7 +28,7 @@ public class RanksCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Check if sender is a player
+        // Check if the sender is a player
         if (!(sender instanceof Player)) {
             sender.sendMessage("This command can only be used by players.");
             return true;
@@ -44,20 +45,24 @@ public class RanksCommand implements CommandExecutor {
 
         player.sendMessage(ChatColor.YELLOW + "Available Ranks:");
 
+        // List all ranks from the track
         List<String> groupNames = track.getGroups();
         for (String rankName : groupNames) {
             // Skip 'default' rank
             if (rankName.equalsIgnoreCase("default")) {
                 continue;
             }
+
+            // Fetch the price for the rank from the config
             int price = plugin.getConfig().getInt("ranks." + rankName.toUpperCase() + ".price", -1);
             if (price == -1) {
-                player.sendMessage(ChatColor.RED + "Price for rank " + rankName + " is not set in the config!");
+                player.sendMessage(ChatColor.RED + "Price for rank " + rankName.toUpperCase() + " is not set in the config!");
                 continue;
             }
-            player.sendMessage(ChatColor.GREEN + rankName + ChatColor.WHITE + ": $" + moneyFormat.format(price));
-        }
 
+            // Display the rank in uppercase and its cost
+            player.sendMessage(ChatColor.GREEN + rankName.toUpperCase() + ChatColor.WHITE + ": $" + moneyFormat.format(price));
+        }
 
         return true;
     }

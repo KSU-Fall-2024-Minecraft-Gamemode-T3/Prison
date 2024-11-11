@@ -1,12 +1,13 @@
 package ksu.minecraft.prison.managers;
 
 import ksu.minecraft.prison.Prison;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +27,7 @@ public class MineManager {
         loadMines();
     }
 
-    //Initializes the mines configuration file (mines.yml).
-     //Loads the configuration or creates an empty one if it does not exist.
-
+    // Initializes the mines configuration file (mines.yml).
     private void initializeMinesConfig() {
         minesFile = new File(plugin.getDataFolder(), "mines.yml");
 
@@ -47,8 +46,7 @@ public class MineManager {
         }
     }
 
-    //Loads mines from the configuration into memory.
-
+    // Loads mines from the configuration into memory.
     private void loadMines() {
         ConfigurationSection minesSection = minesConfig.getConfigurationSection("mines");
         if (minesSection != null) {
@@ -57,33 +55,34 @@ public class MineManager {
                 if (mineSection != null) {
                     Mine mine = new Mine(mineKey, mineSection);
                     mines.put(mineKey.toLowerCase(), mine);
+                    plugin.getLogger().info("Loaded mine: " + mineKey);
+                } else {
+                    plugin.getLogger().warning("Mine section for " + mineKey + " is null.");
                 }
             }
+        } else {
+            plugin.getLogger().warning("No mines found in configuration.");
         }
     }
 
-    //Saves any changes to mines.yml if there are modifications.
-
+    // Saves any changes to mines.yml if there are modifications.
     public void saveMinesConfig() {
-        if (minesChanged) {
-            try {
-                // Update the minesConfig with current mine data
-                minesConfig.set("mines", null); // Clear existing data
-                ConfigurationSection minesSection = minesConfig.createSection("mines");
-                for (Mine mine : mines.values()) {
-                    ConfigurationSection mineSection = minesSection.createSection(mine.getName());
-                    mine.saveToConfig(mineSection);
-                }
-                minesConfig.save(minesFile);
-                minesChanged = false; // Reset the flag after saving
-            } catch (IOException e) {
-                plugin.getLogger().severe("Could not save mines.yml: " + e.getMessage());
+        try {
+            // Update the minesConfig with current mine data
+            minesConfig.set("mines", null); // Clear existing data
+            ConfigurationSection minesSection = minesConfig.createSection("mines");
+            for (Mine mine : mines.values()) {
+                ConfigurationSection mineSection = minesSection.createSection(mine.getName());
+                mine.saveToConfig(mineSection);
             }
+            minesConfig.save(minesFile);
+            minesChanged = false; // Reset the flag after saving
+        } catch (IOException e) {
+            plugin.getLogger().severe("Could not save mines.yml: " + e.getMessage());
         }
     }
 
-    //Reloads the mines.yml configuration.
-
+    // Reloads the mines.yml configuration.
     public void reloadMinesConfig() {
         if (minesFile == null) {
             minesFile = new File(plugin.getDataFolder(), "mines.yml");
@@ -94,25 +93,18 @@ public class MineManager {
         plugin.getLogger().info("Mines configuration reloaded.");
     }
 
-
-     //Checks if a mine with the given name exists.
-
+    // Checks if a mine with the given name exists.
     public boolean mineExists(String mineName) {
         return mines.containsKey(mineName.toLowerCase());
     }
 
-
-     //Adds a new mine to the manager.
-
+    // Adds a new mine to the manager.
     public void addMine(Mine mine) {
         mines.put(mine.getName().toLowerCase(), mine);
-        minesChanged = true; // Mark as changed
         saveMinesConfig();   // Save immediately
     }
 
-
-     //Resets the specified mine by clearing it and repopulating it with specified materials.
-
+    // Resets the specified mine by clearing it and repopulating it with specified materials.
     public boolean resetMineCommand(String mineName, Player player) {
         Mine mine = mines.get(mineName.toLowerCase());
         if (mine == null) {
@@ -123,6 +115,7 @@ public class MineManager {
         }
 
         mine.reset();
+        saveMinesConfig(); // Save after reset
 
         if (player != null) {
             player.sendMessage(ChatColor.GREEN + "Mine '" + mineName + "' has been successfully reset.");
@@ -130,25 +123,33 @@ public class MineManager {
         return true;
     }
 
-
-     //Lists all mine names.
-
+    // Lists all mine names.
     public List<String> listMineNames() {
         return new ArrayList<>(mines.keySet());
     }
 
-
-     //Monitors each mine to check if it needs resetting.
-     // Resets a mine if it falls below a certain resource threshold or time delay.
-
     public void monitorMines() {
         for (Mine mine : mines.values()) {
-            if (mine.shouldReset()) {
-                if (!mine.isSilent()) {
-                    Bukkit.broadcastMessage(ChatColor.GREEN + "Mine '" + mine.getName() + "' has been reset automatically.");
-                }
+            double currentPercentage = mine.getCurrentResourcePercentage();
+            double percentageMined = 100.0 - currentPercentage; // Calculate percentage mined
+            if (percentageMined >= mine.getResetPercentage()) {
                 mine.reset();
+                saveMinesConfig(); // Save after reset
             }
         }
+    }
+
+
+    public Mine getMine(String mineName) {
+        return mines.get(mineName.toLowerCase());
+    }
+
+    public Mine getMineByLocation(@NotNull Location location) {
+        for (Mine mine : mines.values()) {
+            if (mine.containsLocation(location)) {
+                return mine;
+            }
+        }
+        return null;
     }
 }

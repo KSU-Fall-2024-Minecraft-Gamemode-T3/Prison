@@ -54,6 +54,14 @@ Lists the current mines that are listed in the mines.yml
 
 Refills a specified mine, the name of the mine must be in the mines.yml file
 
+>/mine mines <minename>
+
+Creates a Sign for a mine and will write it to the mines.yml file
+
+>/cells rent <cellname>
+
+Rents a cell based on its name. If the player has the money to do so, the cell is attributed to that player and updates the sign to state who has rented the cell.
+
 >/warp <location>
 
 Teleports the user to a specified mine or to the cells area

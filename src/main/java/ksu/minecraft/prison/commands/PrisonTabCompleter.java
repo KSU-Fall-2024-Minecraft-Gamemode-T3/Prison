@@ -47,7 +47,7 @@ public class PrisonTabCompleter implements TabCompleter {
 
     private void handlePrisonTabCompletion(String[] args, List<String> completions) {
         if (args.length == 1) {
-            List<String> subCommands = List.of("help", "ksu");
+            List<String> subCommands = List.of("help", "ksu", "resetshops");
             completions.addAll(filterCompletions(subCommands, args[0]));
         }
     }

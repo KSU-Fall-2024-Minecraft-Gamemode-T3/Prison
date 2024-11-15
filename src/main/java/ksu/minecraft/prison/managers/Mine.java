@@ -233,7 +233,7 @@ public class Mine {
 
     public double getCurrentResourcePercentage() {
         double percentage = ((double) (totalBlocks - blocksMined) / totalBlocks) * 100.0;
-        Bukkit.getLogger().info("Mine '" + name + "' resource percentage: " + percentage + "%");
+        //Bukkit.getLogger().info("Mine '" + name + "' resource percentage: " + percentage + "%");
         return percentage;
     }
 

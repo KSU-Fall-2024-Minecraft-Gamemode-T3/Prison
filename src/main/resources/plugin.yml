@@ -8,7 +8,7 @@ commands:
   prison:
     description: Main command for the Prison plugin
     usage: /prison <args>
-    aliases: [prison]
+    aliases: [pr]
   ranks:
     description: Shows rank progression and costs
     usage: /ranks
@@ -51,6 +51,9 @@ permissions:
       default: op
     prison.mines.createsign:
       description: Allows creating mine signs
+      default: op
+    prison.resetshops:
+      description: Allows resetting of shop villagers.
       default: op
 
 permission-message: You do not have permission to execute this command.

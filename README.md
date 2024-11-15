@@ -50,15 +50,15 @@ Reloads this plugin and configuration files.
 
 Lists the current mines that are listed in the mines.yml
 
->/mine reset <minename>
+>/mine reset [minename]
 
 Refills a specified mine, the name of the mine must be in the mines.yml file
 
->/mine mines <minename>
+>/mine mines [minename]
 
 Creates a Sign for a mine and will write it to the mines.yml file
 
->/cells rent <cellname>
+>/cells rent [cellname]
 
 Rents a cell based on its name. If the player has the money to do so, the cell is attributed to that player and updates the sign to state who has rented the cell.
 
